@@ -1,0 +1,5 @@
+{
+  "token": "your_bot_token",
+  "clientId": "your_bot_id",
+  "nvidiaApiKey": "nvidia_api_key"
+}

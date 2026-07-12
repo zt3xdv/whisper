@@ -1,0 +1,22 @@
+{
+  "name": "whisper",
+  "version": "1.0.0",
+  "description": "Whisper is a Discord Bot",
+  "keywords": [
+    "whisper",
+    "discord",
+    "bot"
+  ],
+  "license": "MIT",
+  "author": "tsumugi_dev",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "deploy": "node src/deploy.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "discord.js": "^14.26.5"
+  }
+}
