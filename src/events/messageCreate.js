@@ -62,7 +62,7 @@ export default {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "meta/llama-3.3-70b-instruct",
+          model: "meta/llama-3.1-70b-instruct",
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: contextText + "\n\nRespond in Discord. The last message is also directed to you." }
