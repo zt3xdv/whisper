@@ -67,7 +67,8 @@ export default {
             { role: "system", content: systemPrompt },
             { role: "user", content: contextText + "\n\nRespond in Discord. The last message is also directed to you." }
           ],
-          temperature: 0.7
+          max_tokens: 512,
+          temperature: 0.6
         })
       });
 
