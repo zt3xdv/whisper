@@ -25,7 +25,7 @@ export default {
   async execute(message) {
     let typingInterval;
     try {
-      if (channelIds.has(message.channel.id)) return;
+      if (!channelIds.has(message.channel.id)) return;
       if (message.author.bot) return;
 
       const member =
