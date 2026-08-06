@@ -1,5 +1,6 @@
 {
   "token": "your_bot_token",
   "clientId": "your_bot_id",
-  "nvidiaApiKey": "nvidia_api_key"
+  "groqApiKey": "groq_api_key",
+  "tavilyApiKey": "tavily_api_key"
 }
