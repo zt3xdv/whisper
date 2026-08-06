@@ -9,8 +9,7 @@ const channelIds = new Set([
 const allowedRoles = new Set([
   "1522989849395593306", // Admin and Whisper AI
   "1525650389725085857",
-
-  // Add roles for Wispbyte Community
+  "1505258838536753372" // VMOTC
 ]);
 
 const maxContextMessages = 30;
