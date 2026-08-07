@@ -1,4 +1,4 @@
-import { MessageFlags, ComponentType, ChannelType, PermissionsBitField } from "discord.js";
+import { MessageFlags, ComponentType, ChannelType, PermissionsBitField, ApplicationCommandOptionType } from "discord.js";
 import { isStaff } from "../utils/staff.js";
 
 export default {
@@ -8,7 +8,7 @@ export default {
     {
       name: 'channel',
       description: 'Channel to lock or leave blank for the current channel',
-      type: 7,
+      type: ApplicationCommandOptionType.Channel,
       required: false
     }
   ],
