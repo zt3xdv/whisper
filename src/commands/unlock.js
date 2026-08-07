@@ -43,7 +43,7 @@ export default {
       });
     }
 
-    if (channel.permissionsFor('1464334628838969456').has(PermissionsBitField.Flags.Speak)) {
+    if (channel.permissionsFor('1464334628838969456').has(PermissionsBitField.Flags.SendTTSMessages)) {
       channel.permissionOverwrites.delete('1464334628838969456');
     }
 

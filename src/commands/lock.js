@@ -60,7 +60,7 @@ export default {
     });
 
     await channel.permissionOverwrites.edit('1464334628838969456', {
-      Speak: true,
+      SendTTSMessages: true,
     });
 
 

@@ -66,7 +66,7 @@ export default {
 
       // A random empty role so that unlockdown can tell what channels to unlock when it comes to it
       promises.push(channel.permissionOverwrites.edit('1464334628838969456', {
-        Speak: true,
+        SendTTSMessages: true,
       }));
     });
 

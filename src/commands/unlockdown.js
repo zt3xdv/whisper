@@ -26,16 +26,17 @@ export default {
     // Filter channels to only the ones wanted
     const channels = interaction.guild.channels.cache.filter(channel =>
       channel.permissionsFor(interaction.client.user.id).has(PermissionsBitField.Flags.ManageChannels) &&
-            channel.permissionsFor('1464334628838969456').has(PermissionsBitField.Flags.Speak) &&
-            [
-              ChannelType.GuildAnnouncement,
-              ChannelType.GuildStageVoice,
-              ChannelType.GuildText,
-              ChannelType.GuildVoice,
-              ChannelType.GuildForum,
-              ChannelType.GuildMedia,
-            ].includes(channel.type),
+        channel.permissionsFor('1464334628838969456').has(PermissionsBitField.Flags.SendTTSMessages) &&
+        [
+          ChannelType.GuildAnnouncement,
+          ChannelType.GuildStageVoice,
+          ChannelType.GuildText,
+          ChannelType.GuildVoice,
+          ChannelType.GuildForum,
+          ChannelType.GuildMedia,
+        ].includes(channel.type),
     );
+    console.log('Unlocking:', channels.map(channel => channel.name));
 
     if (channels.size === 0) {
       return interaction.reply({
