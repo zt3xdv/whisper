@@ -2,6 +2,7 @@ import config from "../config.json" with { type: "json" };
 import { Client, GatewayIntentBits, Partials, Collection } from "discord.js";
 import { getFilesFromDir } from "./utils/file.js";
 import path from "path";
+import { QuickDB, JsonDriver } from "quick.db";
 
 process.on("unexpectedException", console.error);
 process.on("unhandledRejection", console.error);
@@ -11,6 +12,9 @@ const client = new Client({
   partials: [Partials.Channel]
 });
 client.commands = new Collection();
+
+const db = new QuickDB({ driver: new JsonDriver({ filePath: "./database.qdb" }) });
+client.db = db;
 
 for (const file of getFilesFromDir(path.join(import.meta.dirname, "commands"))) {
   const m = await import(`file://${file}`),
