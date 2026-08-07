@@ -12,7 +12,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "npm run deploy; npm start",
+    "start:bot": "node src/index.js",
     "deploy": "node src/deploy.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
