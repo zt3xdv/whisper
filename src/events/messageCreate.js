@@ -51,15 +51,16 @@ export default {
 
       const fetched = await message.channel.messages.fetch({ limit: maxContextMessages });
       const msgs = [...fetched.values()].sort((a, b) => a.createdTimestamp - b.createdTimestamp);
+      const knownAs = [];
       
       // So inefficient, Just for now
       const contextText = msgs
         .map(m => {
           const displayName = m.member?.displayName || m.author.username;
-          const knownAs = await Settings.get(message.client.db, m.author.id, "knownAs");
+          if (!knownAs.includes(m.author.id)) knownAs[m.author.id] = await Settings.get(message.client.db, m.author.id, "knownAs");
           
           const content = truncateByChars(m.content, maxMessageLength);
-          return `${knownAs || displayName}: ${content}`.trim();
+          return `${knownAs[m.author.id] || displayName}: ${content}`.trim();
         })
         .filter(Boolean)
         .join("\n");
