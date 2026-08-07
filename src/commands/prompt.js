@@ -9,7 +9,7 @@ export default {
       name: "prompt",
       description: "The new system prompt",
       type: 3,
-      required: true,
+      required: false,
     },
   ],
 
@@ -31,25 +31,44 @@ export default {
       });
     }
 
-    const prompt = interaction.options.getString("prompt", true);
+    const prompt = interaction.options.getString("prompt");
 
     try {
-      await interaction.client.db.set("systemPrompt", prompt);
+      if (prompt) {
+        await interaction.client.db.set("systemPrompt", prompt);
 
-      return await interaction.reply({
-        components: [
-          {
-            type: ComponentType.Container,
-            components: [
-              {
-                type: ComponentType.TextDisplay,
-                content: `System prompt updated successfully.`
-              }
-            ]
-          }
-        ],
-        flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral
-      });
+        return await interaction.reply({
+          components: [
+            {
+              type: ComponentType.Container,
+              components: [
+                {
+                  type: ComponentType.TextDisplay,
+                  content: `System prompt updated successfully.`
+                }
+              ]
+            }
+          ],
+          flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral
+        });
+      } else {
+        const systemPrompt = await interaction.client.db.get("systemPrompt");
+        
+        return await interaction.reply({
+          components: [
+            {
+              type: ComponentType.Container,
+              components: [
+                {
+                  type: ComponentType.TextDisplay,
+                  content: systemPrompt
+                }
+              ]
+            }
+          ],
+          flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral
+        });
+      }
     } catch (err) {
       console.error("Failed to set system prompt:", err);
       return await interaction.reply({
