@@ -71,7 +71,7 @@ export default {
     });
 
     // Waits for all channel overwrites to apply
-    await Promise.all(...promises);
+    await Promise.all(promises);
 
     interaction.editReply({
       components: [
