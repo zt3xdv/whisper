@@ -1,3 +1,4 @@
+import { Events } from "discord.js";
 import config from "../../config.json" with { type: "json" };
 import { staffRoleIds } from "../utils/staff.js";
 
@@ -24,7 +25,7 @@ function truncateByChars(s, max) {
 }
 
 export default {
-  name: "messageCreate",
+  name: Events.MessageCreate,
   async execute(message) {
     let typingInterval;
     try {

@@ -1,5 +1,7 @@
+import { Events } from "discord.js";
+
 export default {
-  name: "interactionCreate",
+  name: Events.InteractionCreate,
   async execute(interaction) {
     if (!interaction.isChatInputCommand()) return;
 
