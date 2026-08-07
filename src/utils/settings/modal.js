@@ -14,7 +14,7 @@ export function createEditModal(modalCustomId, setting, currentValue) {
         .setLabel("New value (Number)")
         .setStyle(TextInputStyle.Short)
         .setPlaceholder(String(setting.defaultValue ?? ""))
-        .setRequired(true)
+        .setRequired(setting.required)
         .setValue(currentValue !== undefined && currentValue !== null ? String(currentValue) : "");
       components.push(new ActionRowBuilder().addComponents(input));
       break;
@@ -27,7 +27,7 @@ export function createEditModal(modalCustomId, setting, currentValue) {
           .setLabel("New value")
           .setStyle(TextInputStyle.Short)
           .setPlaceholder(String(setting.defaultValue ?? ""))
-          .setRequired(true)
+          .setRequired(setting.required)
           .setValue(currentValue !== undefined && currentValue !== null ? String(currentValue) : "");
         if (typeof setting.min === "number") input.setMinLength(setting.min);
         if (typeof setting.max === "number") input.setMaxLength(setting.max);

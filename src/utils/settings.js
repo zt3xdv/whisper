@@ -6,6 +6,7 @@ export class Settings {
       min: 0,
       max: 32,
       defaultValue: "",
+      required: false,
       name: "Known as",
       description: "How should Whisper know you as?"
     }

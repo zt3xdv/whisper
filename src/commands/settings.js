@@ -7,6 +7,7 @@ export default {
   name: "settings",
   description: "Manage your settings",
 
+  // The code is so ass i know
   async execute(interaction) {
     await interaction.deferReply({});
 
