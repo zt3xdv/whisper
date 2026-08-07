@@ -12,7 +12,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "npm run deploy; npm start:bot",
+    "start": "npm run deploy; npm run start:bot",
     "start:bot": "node src/index.js",
     "deploy": "node src/deploy.js",
     "test": "echo \"Error: no test specified\" && exit 1"
