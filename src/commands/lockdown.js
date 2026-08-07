@@ -25,7 +25,7 @@ export default {
 
     // Filter channels to only the ones wanted
     const channels = interaction.guild.channels.cache.filter(channel =>
-      channel.permissionsFor(interaction.client.user.id).has(PermissionsBitField.Flags.ManageChannels) &&
+      channel.permissionsFor(interaction.client.user.id).has(PermissionsBitField.Flags.ManageRoles) &&
             channel.permissionsFor(interaction.guildId).has(PermissionsBitField.Flags.ViewChannel) &&
             channel.permissionsFor(interaction.guildId).has(PermissionsBitField.Flags.SendMessages) &&
             [

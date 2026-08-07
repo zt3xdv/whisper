@@ -25,7 +25,7 @@ export default {
 
     const channel = interaction.options.getChannel('channel') ?? interaction.channel;
 
-    if (!channel.permissionsFor(interaction.client.user.id).has(PermissionsBitField.Flags.ManageChannels) ||
+    if (!channel.permissionsFor(interaction.client.user.id).has(PermissionsBitField.Flags.ManageRoles) ||
       ![
         ChannelType.GuildAnnouncement,
         ChannelType.GuildStageVoice,

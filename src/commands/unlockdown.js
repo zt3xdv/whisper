@@ -25,7 +25,7 @@ export default {
 
     // Filter channels to only the ones wanted
     const channels = interaction.guild.channels.cache.filter(channel =>
-      channel.permissionsFor(interaction.client.user.id).has(PermissionsBitField.Flags.ManageChannels) &&
+      channel.permissionsFor(interaction.client.user.id).has(PermissionsBitField.Flags.ManageRoles) &&
         channel.permissionsFor('1464334628838969456').has(PermissionsBitField.Flags.SendTTSMessages) &&
         [
           ChannelType.GuildAnnouncement,
