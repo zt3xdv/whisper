@@ -4,10 +4,10 @@ export class Settings {
       key: "knownAs",
       type: "string",
       min: 0,
-      max: 1000,
+      max: 32,
       defaultValue: "",
       name: "Known as",
-      description: "How should Whisper know you?"
+      description: "How should Whisper know you as?"
     }
   ]
 

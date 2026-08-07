@@ -51,14 +51,21 @@ export default {
 
       const fetched = await message.channel.messages.fetch({ limit: maxContextMessages });
       const msgs = [...fetched.values()].sort((a, b) => a.createdTimestamp - b.createdTimestamp);
-      //const knownAs = [];
-      
-      // So inefficient, Just for now
+
+      const uniqueIds = [...new Set(msgs.map(m => m.author?.id).filter(Boolean))];
+      const knownAs = new Map();
+      if (uniqueIds.length) {
+        const results = await Promise.all(
+          uniqueIds.map(id => Settings.get(message.client.db, id, "knownAs").catch(() => ""))
+        );
+        uniqueIds.forEach((id, i) => knownAs.set(id, results[i] ?? ""));
+      }
+
       const contextText = msgs
         .map(m => {
-          const displayName = m.member?.displayName || m.author.username;
-          //if (!knownAs.includes(m.author.id)) knownAs[m.author.id] = await Settings.get(message.client.db, m.author.id, "knownAs");
-          
+          const authorId = m.author?.id;
+          const alias = knownAs.get(authorId) ?? "";
+          const displayName = (alias !== "" && alias !== "none") ? alias : (m.member?.displayName || m.author.username);
           const content = truncateByChars(m.content, maxMessageLength);
           return `${displayName}: ${content}`.trim();
         })
