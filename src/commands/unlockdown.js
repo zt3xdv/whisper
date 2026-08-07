@@ -36,7 +36,6 @@ export default {
           ChannelType.GuildMedia,
         ].includes(channel.type),
     );
-    console.log('Unlocking:', channels.map(channel => channel.name));
 
     if (channels.size === 0) {
       return interaction.reply({
