@@ -1,6 +1,6 @@
 {
   "name": "whisper",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Whisper is a Discord Bot",
   "keywords": [
     "whisper",
@@ -12,8 +12,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "npm run deploy; npm run start:bot",
-    "start:bot": "node src/index.js",
+    "start": "npm run deploy; npm run bot",
+    "bot": "node src/index.js",
     "deploy": "node src/deploy.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

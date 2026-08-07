@@ -1,4 +1,4 @@
-import { PermissionFlagsBits, MessageFlags, ComponentType } from "discord.js";
+import { PermissionFlagsBits, MessageFlags, ComponentType, ApplicationCommandOptionType } from "discord.js";
 
 export default {
   name: "say",
@@ -7,7 +7,7 @@ export default {
     {
       name: "text",
       description: "Text to send",
-      type: 3,
+      type: ApplicationCommandOptionType.String,
       required: true,
     },
   ],

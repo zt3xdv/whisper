@@ -1,14 +1,14 @@
-import { MessageFlags, ComponentType } from "discord.js";
+import { MessageFlags, ComponentType, ApplicationCommandOptionType } from "discord.js";
 import { isStaff } from "../utils/staff.js";
 
 export default {
   name: "prompt",
-  description: "Set the system prompt used by the AI responder",
+  description: "Set or view the system prompt used by the AI",
   options: [
     {
       name: "prompt",
       description: "The new system prompt",
-      type: 3,
+      type: ApplicationCommandOptionType.String,
       required: false,
     },
   ],
@@ -44,7 +44,7 @@ export default {
               components: [
                 {
                   type: ComponentType.TextDisplay,
-                  content: `System prompt updated successfully.`
+                  content: `System prompt updated successfully to\n${prompt}`
                 }
               ]
             }
@@ -61,7 +61,7 @@ export default {
               components: [
                 {
                   type: ComponentType.TextDisplay,
-                  content: systemPrompt
+                  content: `The actual system prompt is\n${systemPrompt}`
                 }
               ]
             }
