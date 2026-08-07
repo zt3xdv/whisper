@@ -35,7 +35,7 @@ export default {
         message.guild?.members?.cache?.get(message.author.id) ||
         (await message.guild?.members?.fetch(message.author.id).catch(() => null));
 
-      const hasAllowedRole = !!member?.roles?.cache?.some(r => allowedRoles.has(r.id) || STAFF_ROLE_IDS.has(r.id));
+      const hasAllowedRole = !!member?.roles?.cache?.some(r => allowedRoles.has(r.id) || staffRoleIds.has(r.id));
       if (!hasAllowedRole) return;
 
       const botMentioned = message.mentions.has(message.client.user);
