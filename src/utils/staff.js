@@ -7,6 +7,7 @@ export const staffRoleIds = new Set([
 
 export function isStaff(member) {
   if (!member) return false;
+  
   // bob so I can test shenanigans
   if (member.id === '640579687822917649') return true;
   

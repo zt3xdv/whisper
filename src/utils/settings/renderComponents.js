@@ -1,0 +1,104 @@
+import { ComponentType, ButtonStyle, MessageFlags } from "discord.js";
+import { Settings } from "../settings.js";
+import { isStaff } from "../staff.js";
+
+// May need a refactor
+export async function buildComponentsV2(client, user, currentPage, itemsPerPage) {
+  const startIndex = currentPage * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, Settings.settingsDefinitions.length);
+  const currentSettings = Settings.settingsDefinitions.slice(startIndex, endIndex).filter(setting => !setting.global || isStaff(user));
+
+  const container = {
+    type: ComponentType.Container,
+    components: [
+      {
+        type: ComponentType.TextDisplay,
+        content: `-# **Settings**`
+      },
+    ]
+  };
+
+  for (const setting of currentSettings) {
+    const value = await Settings.get(client.db, user.id, setting.key) ?? null;
+
+    container.components.push({
+      type: ComponentType.TextDisplay,
+      content: `### ${setting.name ?? setting.key}\n${setting.description}`
+    });
+
+    const actionRow = {
+      type: ComponentType.ActionRow,
+      components: []
+    };
+
+    if (setting.type === "bool") {
+      actionRow.components.push({
+        type: ComponentType.Button,
+        custom_id: `toggle_${setting.key}`,
+        label: value ? "Enabled" : "Disabled",
+        style: value ? ButtonStyle.Success : ButtonStyle.Danger
+      });
+    } else if (setting.type === "string" && Array.isArray(setting.enum)) {
+      actionRow.components.push({
+        type: ComponentType.StringSelect,
+        custom_id: `enum_${setting.key}`,
+        placeholder: "Change value...",
+        options: setting.enum.map(opt => ({
+          label: String(opt),
+          value: String(opt),
+          default: value === opt
+        }))
+      });
+    } else {
+      actionRow.components.push(
+        {
+          type: ComponentType.Button,
+          custom_id: `edit_${setting.key}`,
+          label: "Edit Value",
+          style: ButtonStyle.Secondary
+        },
+        {
+          type: ComponentType.Button,
+          custom_id: `view_${setting.key}`,
+          label: "View Value",
+          style: ButtonStyle.Secondary
+        }
+      );
+    }
+
+    container.components.push(actionRow);
+
+    container.components.push({
+      type: ComponentType.Separator,
+      spacing: 1
+    });
+  }
+
+  if (Settings.settingsDefinitions.length > itemsPerPage) {
+    const prevBtn = {
+      type: ComponentType.Button,
+      custom_id: "prev_page",
+      label: "Prev",
+      style: ButtonStyle.Secondary,
+      disabled: currentPage === 0
+    };
+    const nextBtn = {
+      type: ComponentType.Button,
+      custom_id: "next_page",
+      label: "Next",
+      style: ButtonStyle.Secondary,
+      disabled: endIndex >= Settings.settingsDefinitions.length
+    };
+
+    const pageRow = {
+      type: ComponentType.ActionRow,
+      components: [prevBtn, nextBtn]
+    };
+    container.components.push(pageRow);
+  }
+
+  return {
+    components: [container],
+    flags: MessageFlags.IsComponentsV2
+  };
+}

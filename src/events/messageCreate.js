@@ -1,6 +1,7 @@
 import { Events } from "discord.js";
 import config from "../../config.json" with { type: "json" };
 import { staffRoleIds } from "../utils/staff.js";
+import { Settings } from "../utils/settings.js";
 
 const defaultSystemPrompt = `You are Whisper, a chill Discord bot in Wispbyte's server. Talk like a normal person in a Discord chat - casual, short replies, no overthinking. Do NOT analyze or narrate what users are doing. Just respond naturally to what they say. Do not use markdown formatting. Do not introduce yourself unless asked. When someone says whisper they are talking to you. The chat history is just context so you know what's going on — respond only to the latest message directed at you. Talk naturally, dont use formal writing if not asked, just chat normally, and make sure to not be threated like a good boy (be mad at it)`;
 const channelIds = new Set([
@@ -42,19 +43,23 @@ export default {
       const botMentioned = message.mentions.has(message.client.user);
       const includesWhisper = message.content.toLowerCase().includes("whisper");
       if (!botMentioned && !includesWhisper) return;
-
+      
+      message.channel.sendTyping().catch(() => {});
       typingInterval = setInterval(() => {
         message.channel.sendTyping().catch(() => {});
       }, 3500);
 
       const fetched = await message.channel.messages.fetch({ limit: maxContextMessages });
       const msgs = [...fetched.values()].sort((a, b) => a.createdTimestamp - b.createdTimestamp);
-
+      
+      // So inefficient, Just for now
       const contextText = msgs
         .map(m => {
           const displayName = m.member?.displayName || m.author.username;
+          const knownAs = await Settings.get(message.client.db, m.author.id, "knownAs");
+          
           const content = truncateByChars(m.content, maxMessageLength);
-          return `${displayName}: ${content}`.trim();
+          return `${knownAs || displayName}: ${content}`.trim();
         })
         .filter(Boolean)
         .join("\n");
