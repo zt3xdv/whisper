@@ -8,7 +8,7 @@ const whitelistChannels = [
 
 export default {
   name: Events.MessageCreate,
-  async execute(message) => {
+  async execute(message) {
     if (!whitelistChannels.includes(message.channelId)) return;
     
     try {
