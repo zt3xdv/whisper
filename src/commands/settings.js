@@ -93,7 +93,7 @@ export default {
 
           const currentValue = await Settings.get(client.db, userId, setting.key);
           await btnInt.reply({
-            content: `-# **${setting.name ?? setting.key}** value\n\`\`\`${currentValue}\`\`\``,
+            content: `-# **${setting.name ?? setting.key}**\n\`\`\`${currentValue}\`\`\``,
             ephemeral: true
           });
           return;

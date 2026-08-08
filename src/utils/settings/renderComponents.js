@@ -1,6 +1,7 @@
 import { ComponentType, ButtonStyle, MessageFlags } from "discord.js";
 import { Settings } from "../settings.js";
 import { isStaff } from "../staff.js";
+import { emojis } from "../emojis.js"
 
 // May need a refactor
 export async function buildComponentsV2(client, user, currentPage, itemsPerPage) {
@@ -13,7 +14,7 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
     components: [
       {
         type: ComponentType.TextDisplay,
-        content: `-# **Settings**`
+        content: `-# ${emojis.settings} **Settings**`
       },
     ]
   };
@@ -78,14 +79,14 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
     const prevBtn = {
       type: ComponentType.Button,
       custom_id: "prev_page",
-      label: "Prev",
+      emoji: emojis.left,
       style: ButtonStyle.Secondary,
       disabled: currentPage === 0
     };
     const nextBtn = {
       type: ComponentType.Button,
       custom_id: "next_page",
-      label: "Next",
+      emoji: emojis.right,
       style: ButtonStyle.Secondary,
       disabled: endIndex >= Settings.settingsDefinitions.length
     };
