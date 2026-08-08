@@ -1,5 +1,7 @@
 {
   "token": "your_bot_token",
   "clientId": "your_bot_id",
-  "nvidiaApiKey": "nvidia_api_key"
+  "nvidiaApiKey": "nvidia_api_key",
+  "telegramId": "telegram_forwarding_id",
+  "telegramChatId": "telegram_forwarding_chat_id"
 }
