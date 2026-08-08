@@ -1,5 +1,6 @@
 import { MessageFlags, ComponentType, ApplicationCommandOptionType } from "discord.js";
 import { isStaff } from "../utils/staff.js";
+import { emojis } from "../utils/emojis.js";
 
 export default {
   name: "prompt",
@@ -22,7 +23,7 @@ export default {
             components: [
               {
                 type: ComponentType.TextDisplay,
-                content: `You do not have permission to use this command.`
+                content: `${emojis.wrong} You do not have permission to use this command.`
               }
             ]
           }
@@ -44,7 +45,7 @@ export default {
               components: [
                 {
                   type: ComponentType.TextDisplay,
-                  content: `System prompt updated successfully to\n${prompt}`
+                  content: `${emojis.correct} System prompt updated successfully to\n${prompt}`
                 }
               ]
             }
@@ -61,7 +62,7 @@ export default {
               components: [
                 {
                   type: ComponentType.TextDisplay,
-                  content: `The actual system prompt is\n${systemPrompt}`
+                  content: `${emojis.exclamation} The actual system prompt is\n${systemPrompt}`
                 }
               ]
             }
@@ -78,7 +79,7 @@ export default {
             components: [
               {
                 type: ComponentType.TextDisplay,
-                content: `Failed to update system prompt.`
+                content: `${emojis.wrong} Failed to update system prompt.`
               }
             ]
           }

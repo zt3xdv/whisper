@@ -1,4 +1,5 @@
 import { MessageFlags, ComponentType } from "discord.js";
+import { emojis } from "../utils/emojis.js";
 
 export default {
   name: "ping",
@@ -12,7 +13,7 @@ export default {
           components: [
             {
               type: ComponentType.TextDisplay,
-              content: `**Pong!**\n-# Latency: ${interaction.client.ws.ping}ms`
+              content: `${emojis.pings} **Pong!**\n-# Latency: ${interaction.client.ws.ping}ms`
             }
           ]
         }

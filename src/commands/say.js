@@ -1,4 +1,5 @@
 import { PermissionFlagsBits, MessageFlags, ComponentType, ApplicationCommandOptionType } from "discord.js";
+import { emojis } from "../utils/emojis.js";
 
 export default {
   name: "say",
@@ -21,7 +22,7 @@ export default {
             components: [
               {
                 type: ComponentType.TextDisplay,
-                content: `You do not have permission to use this command.`
+                content: `${emojis.wrong} You do not have permission to use this command.`
               }
             ]
           }
@@ -40,7 +41,7 @@ export default {
           components: [
             {
               type: ComponentType.TextDisplay,
-              content: `Message sent!`
+              content: `${emojis.correct} Message sent!`
             }
           ]
         }

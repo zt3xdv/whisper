@@ -1,5 +1,6 @@
 import { MessageFlags, ComponentType, ChannelType, PermissionsBitField } from "discord.js";
 import { isStaff } from "../utils/staff.js";
+import { emojis } from "../utils/emojis.js";
 
 export default {
   name: "unlockdown",
@@ -14,7 +15,7 @@ export default {
             components: [
               {
                 type: ComponentType.TextDisplay,
-                content: 'You do not have permission to use this command.',
+                content: `${emojis.wrong} You do not have permission to use this command.`,
               },
             ],
           },
@@ -45,7 +46,7 @@ export default {
             components: [
               {
                 type: ComponentType.TextDisplay,
-                content: 'I found no channels to unlock. The unlockdown command is only able to unlock channels that were locked with the /lock command or /lockdown command due to reasons that I cba to say',
+                content: `${emojis.exclamation} I found no channels to unlock. The unlockdown command is only able to unlock channels that were locked with the /lock command or /lockdown command due to reasons that I cba to say ig`,
               },
             ],
           },
@@ -76,7 +77,7 @@ export default {
           components: [
             {
               type: ComponentType.TextDisplay,
-              content: `Unlocked ${channels.size} channel${channels.size === 1 ? '' : 's'}`,
+              content: `${emojis.correct} Unlocked ${channels.size} channel${channels.size === 1 ? '' : 's'}`,
             },
           ],
         },

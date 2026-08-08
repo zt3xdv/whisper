@@ -1,5 +1,6 @@
 import { MessageFlags, ComponentType, ChannelType, PermissionsBitField, ApplicationCommandOptionType } from "discord.js";
 import { isStaff } from "../utils/staff.js";
+import { emojis } from "../utils/emojis.js";
 
 export default {
   name: "unlock",
@@ -18,7 +19,7 @@ export default {
       return interaction.reply({
         components: [{
           type: ComponentType.Container, components:
-            [{ type: ComponentType.TextDisplay, content: 'You do not have permission to use this command.' }],
+            [{ type: ComponentType.TextDisplay, content: `${emojis.wrong} You do not have permission to use this command.` }],
         }], flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
       });
     }
@@ -38,7 +39,7 @@ export default {
       return interaction.reply({
         components: [{
           type: ComponentType.Container, components:
-            [{ type: ComponentType.TextDisplay, content: 'I cannot lock this channel' }],
+            [{ type: ComponentType.TextDisplay, content: `${emojis.exclamation} I cannot unlock this channel` }],
         }], flags: MessageFlags.IsComponentsV2,
       });
     }
@@ -51,7 +52,7 @@ export default {
       return interaction.reply({
         components: [{
           type: ComponentType.Container, components:
-            [{ type: ComponentType.TextDisplay, content: 'This channel is already unlocked' }],
+            [{ type: ComponentType.TextDisplay, content: `${emojis.exclamation} This channel is already unlocked` }],
         }], flags: MessageFlags.IsComponentsV2,
       });
     }
@@ -71,7 +72,7 @@ export default {
           components: [
             {
               type: ComponentType.TextDisplay,
-              content: `Unlocked <#${channel.id}>`,
+              content: `${emojis.correct} Unlocked <#${channel.id}>`,
             },
           ],
         },
