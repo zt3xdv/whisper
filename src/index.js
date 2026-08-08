@@ -1,3 +1,4 @@
+// 67
 import config from "../config.json" with { type: "json" };
 import { Client, GatewayIntentBits, Partials, Collection } from "discord.js";
 import { getFilesFromDir } from "./utils/file.js";
