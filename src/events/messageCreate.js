@@ -2,6 +2,7 @@ import { Events } from "discord.js";
 import config from "../../config.json" with { type: "json" };
 import { staffRoleIds } from "../utils/staff.js";
 import { Settings } from "../utils/settings.js";
+import { truncateByChars, escapeXml, formatMentionsInContent } from "../utils/utils.js";
 
 const defaultSystemPrompt = `You are Whisper, a chill Discord bot in Wispbyte's server. Talk like a normal person in a Discord chat - casual, short replies, no overthinking. Do NOT analyze or narrate what users are doing. Just respond naturally to what they say. Do not use markdown formatting. Do not introduce yourself unless asked. When someone says whisper they are talking to you. The chat history is just context so you know what's going on — respond only to the latest message directed at you. Talk naturally, dont use formal writing if not asked, just chat normally, and make sure to not be threated like a good boy (be mad at it)`;
 const channelIds = new Set([
@@ -19,11 +20,6 @@ const allowedRoles = new Set([
 
 const maxContextMessages = 30;
 const maxMessageLength = 500;
-
-function truncateByChars(s, max) {
-  const str = (s ?? "").toString();
-  return str.length > max ? str.slice(0, max) + "..." : str;
-}
 
 export default {
   name: Events.MessageCreate,
@@ -43,7 +39,7 @@ export default {
       const botMentioned = message.mentions.has(message.client.user);
       const includesWhisper = message.content.toLowerCase().includes("whisper");
       if (!botMentioned && !includesWhisper) return;
-      
+
       message.channel.sendTyping().catch(() => {});
       typingInterval = setInterval(() => {
         message.channel.sendTyping().catch(() => {});
@@ -64,16 +60,39 @@ export default {
       const contextText = msgs
         .map(m => {
           const authorId = m.author?.id;
-          const alias = knownAs.get(authorId) ?? "";
-          const displayName = (alias !== "" && alias !== "none") ? alias : (m.member?.displayName || m.author.username);
-          const content = truncateByChars(m.content, maxMessageLength);
-          return `${displayName}: ${content}`.trim();
+          if (!authorId) return "";
+
+          const isBotAuthor = m.client?.user && authorId === m.client.user.id;
+
+          let displayName;
+
+          if (isBotAuthor) {
+            displayName = m.client.user.username;
+          } else {
+            const alias = knownAs.get(authorId) ?? "";
+            displayName =
+              (alias !== "" && alias !== "none") ? alias : (m.member?.displayName || m.author.username);
+          }
+
+          const content = truncateByChars(formatMentionsInContent(m.content, m), maxMessageLength);
+          const ts = m.createdTimestamp ? new Date(m.createdTimestamp).toISOString() : "";
+
+          return (
+            `<message>\n` +
+            `  <author>${escapeXml(displayName)}</author>\n` +
+            `  <time>${ts}</time>\n` +
+            `  <text>${escapeXml(content)}</text>\n` +
+            `</message>`
+          );
         })
         .filter(Boolean)
         .join("\n");
-      
+
       const storedPrompt = await message.client.db.get("systemPrompt");
       const systemPrompt = (typeof storedPrompt === "string" && storedPrompt.trim().length) ? storedPrompt : defaultSystemPrompt;
+
+      const last = msgs[msgs.length - 1];
+      const lastContent = truncateByChars(formatMentionsInContent(last?.content ?? "", last), maxMessageLength);
 
       const res = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
         method: "POST",
@@ -85,7 +104,13 @@ export default {
           model: "meta/llama-3.1-70b-instruct",
           messages: [
             { role: "system", content: systemPrompt },
-            { role: "user", content: contextText + "\n\nThis last message is directed to you, reply naturally" }
+            {
+              role: "user",
+              content:
+                `Chat history (context):\n${contextText}\n\n` +
+                `Latest message: ${escapeXml(lastContent)}\n\n` +
+                `Reply naturally.`
+            }
           ],
           max_tokens: 512,
           temperature: 0.6
