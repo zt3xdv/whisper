@@ -110,7 +110,7 @@ export default {
               content:
                 `Chat history (context):\n${contextText}\n\n` +
                 `Latest message: ${escapeXml(lastContent)}\n\n` +
-                `Reply naturally, add exactly <tts/> if you want to send a voice message (only if asked).`
+                `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked).`
             }
           ],
           max_tokens: 512,
@@ -127,12 +127,12 @@ export default {
       const answer = data.choices[0].message.content.trim() || "I couldn't generate a response.";
       
       // Many thanks to melo (@mloetta)
-      if (answer.includes("<tts/>")) {
+      if (answer.includes("%tts%")) {
         const elevenlabs = new ElevenLabsClient({ apiKey: config.elevenLabsApiKey });
         
         // Just male voice for now
         const audio = await elevenlabs.textToSpeech.convertWithTimestamps("M563YhMmA0S8vEYwkgYa", {
-          text: answer.replace("<tts/>", ""),
+          text: answer.replace("%tts%", ""),
           languageCode: "en",
           modelId: "eleven_flash_v2_5",
           outputFormat: "opus_48000_192",
@@ -140,7 +140,7 @@ export default {
 
         const buffer = Buffer.from(audio.audioBase64, "base64");
         
-        await message.reply({
+        return await message.reply({
           attachments: [
             {
               id: 0,
