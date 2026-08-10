@@ -160,8 +160,7 @@ export default {
 
       // Many thanks to melo (@mloetta)
       // May fix later
-      //if (answer.includes("%tts%")) {
-      if (false) {
+      if (answer.includes("%tts%")) {
         const elevenlabs = new ElevenLabsClient({ apiKey: config.elevenLabsApiKey });
 
         const ttsText = answer.replace("%tts%", "").trim();
