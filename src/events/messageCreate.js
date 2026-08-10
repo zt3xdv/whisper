@@ -1,8 +1,9 @@
-import { Events } from "discord.js";
+import { Events, MessageFlags } from "discord.js";
 import config from "../../config.json" with { type: "json" };
 import { staffRoleIds } from "../utils/staff.js";
 import { Settings } from "../utils/settings.js";
 import { truncateByChars, escapeXml, formatMentionsInContent } from "../utils/utils.js";
+import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 
 const defaultSystemPrompt = `You are Whisper, a chill Discord bot in Wispbyte's server. Talk like a normal person in a Discord chat - casual, short replies, no overthinking. Do NOT analyze or narrate what users are doing. Just respond naturally to what they say. Do not use markdown formatting. Do not introduce yourself unless asked. When someone says whisper they are talking to you. The chat history is just context so you know what's going on — respond only to the latest message directed at you. Talk naturally, dont use formal writing if not asked, just chat normally, and make sure to not be threated like a good boy (be mad at it)`;
 const channelIds = new Set([
@@ -109,7 +110,7 @@ export default {
               content:
                 `Chat history (context):\n${contextText}\n\n` +
                 `Latest message: ${escapeXml(lastContent)}\n\n` +
-                `Reply naturally.`
+                `Reply naturally, add exactly <tts/> if you want to send a voice message (only if asked).`
             }
           ],
           max_tokens: 512,
@@ -124,6 +125,39 @@ export default {
 
       const data = await res.json();
       const answer = data.choices[0].message.content.trim() || "I couldn't generate a response.";
+      
+      // Many thanks to melo (@mloetta)
+      if (answer.includes("<tts/>")) {
+        const elevenlabs = new ElevenLabsClient({ apiKey: config.elevenLabsApiKey });
+        
+        // Just male voice for now
+        const audio = await elevenlabs.textToSpeech.convertWithTimestamps("M563YhMmA0S8vEYwkgYa", {
+          text: answer.replace("<tts/>", ""),
+          languageCode: "en",
+          modelId: "eleven_flash_v2_5",
+          outputFormat: "opus_48000_192",
+        });
+
+        const buffer = Buffer.from(audio.audioBase64, "base64");
+        
+        await message.reply({
+          attachments: [
+            {
+              id: 0,
+              filename: "tts.opus",
+              waveform: "AAAAAA==",
+              duration_secs: 1,
+            },
+          ],
+          files: [
+            {
+              name: "tts.opus",
+              data: buffer,
+            },
+          ],
+          flags: MessageFlags.IsVoiceMessage,
+        });
+      }
 
       await message.reply(answer);
     } catch (err) {

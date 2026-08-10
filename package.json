@@ -18,6 +18,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@elevenlabs/elevenlabs-js": "^2.62.0",
     "discord.js": "^14.26.5",
     "quick.db": "^9.1.7",
     "write-file-atomic": "^8.0.0"
