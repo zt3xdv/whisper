@@ -159,7 +159,9 @@ export default {
       const answer = data.choices[0].message.content.trim() || "I couldn't generate a response.";
 
       // Many thanks to melo (@mloetta)
-      if (answer.includes("%tts%")) {
+      // May fix later
+      //if (answer.includes("%tts%")) {
+      if (false) {
         const elevenlabs = new ElevenLabsClient({ apiKey: config.elevenLabsApiKey });
 
         const ttsText = answer.replace("%tts%", "").trim();
