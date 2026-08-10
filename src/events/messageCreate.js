@@ -176,21 +176,15 @@ export default {
         const buffer = Buffer.from(audio.audioBase64, "base64");
 
         const replyMessage = await message.reply({
-          attachments: [
-            {
-              id: 0,
-              filename: "tts.opus",
-              waveform: "AAAAAA==",
-              duration_secs: 1
-            }
-          ],
           files: [
             {
               name: "tts.opus",
-              data: buffer
-            }
+              attachment: buffer,
+              waveform: "AAAAAA==",
+              duration_secs: 1,
+            },
           ],
-          flags: MessageFlags.IsVoiceMessage
+          flags: MessageFlags.IsVoiceMessage,
         });
 
         setTtsCache(replyMessage.id, ttsText);
