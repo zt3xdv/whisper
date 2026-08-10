@@ -180,6 +180,7 @@ export default {
             {
               name: "tts.opus",
               attachment: buffer,
+              contentType: "audio/ogg",
               waveform: "AAAAAA==",
               duration_secs: 1,
             },
