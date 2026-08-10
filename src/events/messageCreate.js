@@ -142,7 +142,7 @@ export default {
               content:
                 `Chat history (context):\n${contextText}\n\n` +
                 `Latest message: ${escapeXml(lastContent)}\n\n` +
-                `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked, and yes, you can send voice messages).`
+                `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked, and yes, you can send voice messages), if asked to send a voice message, talk yourself, do not repeat what the user says`
             }
           ],
           max_tokens: 512,
