@@ -180,14 +180,10 @@ export default {
         const replyMessage = await message.reply({
           files: [
             {
-              name: "tts.opus",
               attachment: buffer,
-              contentType: "audio/ogg",
-              waveform: "AAAAAA==",
-              duration_secs: 1,
-            },
-          ],
-          flags: MessageFlags.IsVoiceMessage,
+              name: "tts.opus"
+            }
+          ]
         });
 
         setTtsCache(replyMessage.id, ttsText);
