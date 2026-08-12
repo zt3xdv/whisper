@@ -12,7 +12,7 @@ const channelIds = new Set([
   "1112023292333785120", // Wispbyte #general
   "1505259201595838534", // Wispbyte #vmotc-chat
   "1158826812147761162", // Wispbyte #staff-chat
-  "1186021666267082853" // Wiapbyte #international
+  "1186021666267082853" // Wispbyte #international
 ]);
 
 const allowedRoles = new Set([
