@@ -7,20 +7,7 @@ import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 
 const defaultSystemPrompt = `You are Whisper, a chill Discord bot in Wispbyte's server. Talk like a normal person in a Discord chat - casual, short replies, no overthinking. Do NOT analyze or narrate what users are doing. Just respond naturally to what they say. Do not use markdown formatting. Do not introduce yourself unless asked. When someone says whisper they are talking to you. The chat history is just context so you know what's going on — respond only to the latest message directed at you. Talk naturally, dont use formal writing if not asked, just chat normally, and make sure to not be threated like a good boy (be mad at it)`;
 
-const channelIds = new Set([
-  "1522989739953623185", // Wispbyte SMP #general
-  "1112023292333785120", // Wispbyte #general
-  "1505259201595838534", // Wispbyte #vmotc-chat
-  "1158826812147761162", // Wispbyte #staff-chat
-  "1186021666267082853" // Wispbyte #international
-]);
-
-const allowedRoles = new Set([
-  "1522989849395593306", // Admin and Whisper AI
-  "1525650389725085857",
-  "1505258838536753372" // VMOTC
-]);
-
+// Moving to /settings soon
 const maxContextMessages = 30;
 const maxMessageLength = 500;
 
@@ -48,8 +35,16 @@ export default {
   async execute(message) {
     let typingInterval;
     try {
-      if (!channelIds.has(message.channel.id)) return;
       if (message.author.bot) return;
+      
+      const botMentioned = message.mentions.has(message.client.user);
+      const includesWhisper = message.content.toLowerCase().includes("whisper");
+      if (!botMentioned && !includesWhisper) return;
+      
+      const channelIds = await Settings.get(message.client.db, id, "whitelistedChannels");
+      const allowedRoles = await Settings.get(message.client.db, id, "whitelistedRoles");
+      
+      if (!channelIds.has(message.channel.id)) return;
 
       const member =
         message.guild?.members?.cache?.get(message.author.id) ||
@@ -59,10 +54,6 @@ export default {
         r => allowedRoles.has(r.id) || staffRoleIds.has(r.id)
       );
       if (!hasAllowedRole) return;
-
-      const botMentioned = message.mentions.has(message.client.user);
-      const includesWhisper = message.content.toLowerCase().includes("whisper");
-      if (!botMentioned && !includesWhisper) return;
 
       message.channel.sendTyping().catch(() => {});
       typingInterval = setInterval(() => {
@@ -160,7 +151,6 @@ export default {
       const answer = data.choices[0].message.content.trim() || "I couldn't generate a response.";
 
       // Many thanks to melo (@mloetta)
-      // May fix later
       if (answer.includes("%tts%")) {
         const elevenlabs = new ElevenLabsClient({ apiKey: config.elevenLabsApiKey });
 
