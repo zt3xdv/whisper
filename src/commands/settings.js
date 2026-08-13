@@ -12,10 +12,8 @@ export default {
 
     const client = interaction.client;
     const user = interaction.member ?? interaction.user;
-    const userId = user.id;
-    const settingsDefinitions = Settings.settingsDefinitions;
     
-    const itemsPerPage = 5;
+    const itemsPerPage = 3;
     let currentPage = 0;
     
     let lastReply;
@@ -27,7 +25,7 @@ export default {
     await updateMessage();
 
     const selectCollector = lastReply.createMessageComponentCollector({
-      filter: i => i.user.id === userId && i.isAnySelectMenu(),
+      filter: i => i.user.id === user.id && i.isAnySelectMenu(),
       time: 300_000
     });
 
@@ -47,10 +45,10 @@ export default {
           newValue = menuInt.values;
         }
 
-        const setting = settingsDefinitions.find(s => s.key === settingKey);
+        const setting = Settings.settingsDefinitions.find(s => s.key === settingKey);
         if (!setting) return;
 
-        await Settings.put(client.db, userId, setting.key, newValue);
+        await Settings.put(client.db, user.id, setting.key, newValue);
         await updateMessage();
       } catch (err) {}
     });
@@ -58,7 +56,7 @@ export default {
     const buttonCollector = lastReply.createMessageComponentCollector({
       componentType: ComponentType.Button,
       time: 300_000,
-      filter: i => i.user.id === userId
+      filter: i => i.user.id === user.id
     });
 
     buttonCollector.on("collect", async btnInt => {
@@ -74,7 +72,7 @@ export default {
 
         if (id === "next_page") {
           await btnInt.deferUpdate();
-          currentPage = Math.min(Math.ceil(settingsDefinitions.length / itemsPerPage) - 1, currentPage + 1);
+          currentPage = Math.min(Math.ceil(Settings.settingsDefinitions.length / itemsPerPage) - 1, currentPage + 1);
           await updateMessage();
           return;
         }
@@ -82,22 +80,22 @@ export default {
         if (id.startsWith("toggle_")) {
           await btnInt.deferUpdate();
           const settingKey = id.substring(7);
-          const setting = settingsDefinitions.find(s => s.key === settingKey);
+          const setting = Settings.settingsDefinitions.find(s => s.key === settingKey);
           if (!setting) return;
 
-          const currentValue = await Settings.get(client.db, userId, setting.key);
+          const currentValue = await Settings.get(client.db, user.id, setting.key);
           const newValue = !Boolean(currentValue);
-          await Settings.put(client.db, userId, setting.key, newValue);
+          await Settings.put(client.db, user.id, setting.key, newValue);
           await updateMessage();
           return;
         }
 
         if (id.startsWith("view_")) {
           const settingKey = id.substring(5);
-          const setting = settingsDefinitions.find(s => s.key === settingKey);
+          const setting = Settings.settingsDefinitions.find(s => s.key === settingKey);
           if (!setting) return;
 
-          const currentValue = await Settings.get(client.db, userId, setting.key);
+          const currentValue = await Settings.get(client.db, user.id, setting.key);
           await btnInt.reply({
             content: `-# **${setting.name ?? setting.key}**\n\`\`\`${JSON.stringify(currentValue, null, 2)}\`\`\``,
             ephemeral: true
@@ -107,10 +105,10 @@ export default {
 
         if (id.startsWith("edit_")) {
           const settingKey = id.substring(5);
-          const setting = settingsDefinitions.find(s => s.key === settingKey);
+          const setting = Settings.settingsDefinitions.find(s => s.key === settingKey);
           if (!setting) return;
 
-          const currentValue = await Settings.get(client.db, userId, setting.key);
+          const currentValue = await Settings.get(client.db, user.id, setting.key);
           const modalCustomId = `modal_edit_${settingKey}`;
           const modal = createEditModal(modalCustomId, setting, currentValue);
 
@@ -123,7 +121,7 @@ export default {
 
           try {
             const modalSubmitInt = await btnInt.awaitModalSubmit({
-              filter: i => i.customId === modalCustomId && i.user.id === userId,
+              filter: i => i.customId === modalCustomId && i.user.id === user.id,
               time: 60_000
             });
 
@@ -135,7 +133,7 @@ export default {
               if (isNaN(rawValue)) return;
             }
 
-            await Settings.put(client.db, userId, setting.key, rawValue);
+            await Settings.put(client.db, user.id, setting.key, rawValue);
             await updateMessage();
           } catch (err) {}
           return;
