@@ -41,8 +41,8 @@ export default {
       const includesWhisper = message.content.toLowerCase().includes("whisper");
       if (!botMentioned && !includesWhisper) return;
       
-      const channelIds = await Settings.get(message.client.db, id, "whitelistedChannels");
-      const allowedRoles = await Settings.get(message.client.db, id, "whitelistedRoles");
+      const channelIds = await Settings.get(message.client.db, "-", "whitelistedChannels");
+      const allowedRoles = await Settings.get(message.client.db, "-", "whitelistedRoles");
       
       if (!channelIds.has(message.channel.id)) return;
 
