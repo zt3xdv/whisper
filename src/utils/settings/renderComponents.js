@@ -7,7 +7,7 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
   const startIndex = currentPage * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, Settings.settingsDefinitions.length);
   const currentSettings = Settings.settingsDefinitions.slice(startIndex, endIndex).filter(setting => !setting.global || isStaff(user));
-
+  
   const container = {
     type: ComponentType.Container,
     components: [
@@ -42,7 +42,7 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
       actionRow.components.push({
         type: ComponentType.ChannelSelect,
         custom_id: `select_${setting.key}`,
-        placeholder: "Select Channels...",
+        placeholder: "Select channels...",
         min_values: 0,
         max_values: 25,
         default_values: Array.isArray(value) ? value.map(id => ({ id, type: 'channel' })) : []
@@ -51,7 +51,7 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
       actionRow.components.push({
         type: ComponentType.RoleSelect,
         custom_id: `select_${setting.key}`,
-        placeholder: "Select Roles...",
+        placeholder: "Select roles...",
         min_values: 0,
         max_values: 25,
         default_values: Array.isArray(value) ? value.map(id => ({ id, type: 'role' })) : []
@@ -95,27 +95,31 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
   }
 
   if (Settings.settingsDefinitions.length > itemsPerPage) {
-    const prevBtn = {
-      type: ComponentType.Button,
-      custom_id: "prev_page",
-      emoji: emojis.left,
-      style: ButtonStyle.Secondary,
-      disabled: currentPage === 0
-    };
-    const nextBtn = {
-      type: ComponentType.Button,
-      custom_id: "next_page",
-      emoji: emojis.right,
-      style: ButtonStyle.Secondary,
-      disabled: endIndex >= Settings.settingsDefinitions.length
-    };
-
-    const pageRow = {
+    container.components.push({
       type: ComponentType.ActionRow,
-      components: [prevBtn, nextBtn]
-    };
-    container.components.push(pageRow);
+      components: [
+        {
+          type: ComponentType.Button,
+          custom_id: "prev_page",
+          emoji: emojis.left,
+          style: ButtonStyle.Secondary,
+          disabled: currentPage === 0
+        },
+        {
+          type: ComponentType.Button,
+          custom_id: "next_page",
+          emoji: emojis.right,
+          style: ButtonStyle.Secondary,
+          disabled: endIndex >= Settings.settingsDefinitions.length
+        }
+      ]
+    });
   }
+  
+  container.components.push({
+    type: ComponentType.TextDisplay,
+    content: `-# Page ${currentPage} of ${Math.ceil(Settings.settingsDefinitions.length / itemsPerPage)}`
+  });
 
   return {
     components: [container],
