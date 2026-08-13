@@ -1,4 +1,4 @@
-import { ComponentType, ButtonStyle, MessageFlags } from "discord.js";
+import { ComponentType, ButtonStyle, MessageFlags, SeparatorSpacingSize } from "discord.js";
 import { Settings } from "../settings.js";
 import { isStaff } from "../staff.js";
 import { emojis } from "../emojis.js"
@@ -85,11 +85,13 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
     }
 
     container.components.push(actionRow);
-
-    container.components.push({
-      type: ComponentType.Separator,
-      spacing: 1
-    });
+    
+    if (currentSettings.indexOf(setting) != currentSettings.length - 1) {
+      container.components.push({
+        type: ComponentType.Separator,
+        spacing: SeparatorSpacingSize.Large
+      });
+    }
   }
 
   if (Settings.settingsDefinitions.length > itemsPerPage) {
