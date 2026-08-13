@@ -118,7 +118,7 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
   
   container.components.push({
     type: ComponentType.TextDisplay,
-    content: `-# Page ${currentPage} of ${Math.ceil(Settings.settingsDefinitions.length / itemsPerPage)}`
+    content: `-# Page ${currentPage + 1} of ${Math.ceil(Settings.settingsDefinitions.length / itemsPerPage)}`
   });
 
   return {
