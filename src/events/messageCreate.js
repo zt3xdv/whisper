@@ -44,14 +44,14 @@ export default {
       const channelIds = await Settings.get(message.client.db, "-", "whitelistedChannels");
       const allowedRoles = await Settings.get(message.client.db, "-", "whitelistedRoles");
       
-      if (!channelIds.has(message.channel.id)) return;
+      if (!channelIds.includes(message.channel.id)) return;
 
       const member =
         message.guild?.members?.cache?.get(message.author.id) ||
         (await message.guild?.members?.fetch(message.author.id).catch(() => null));
 
       const hasAllowedRole = !!member?.roles?.cache?.some(
-        r => allowedRoles.has(r.id) || staffRoleIds.has(r.id)
+        r => allowedRoles.includes(r.id) || staffRoleIds.has(r.id)
       );
       if (!hasAllowedRole) return;
 
