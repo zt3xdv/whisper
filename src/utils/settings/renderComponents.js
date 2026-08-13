@@ -3,7 +3,6 @@ import { Settings } from "../settings.js";
 import { isStaff } from "../staff.js";
 import { emojis } from "../emojis.js"
 
-// May need a refactor
 export async function buildComponentsV2(client, user, currentPage, itemsPerPage) {
   const startIndex = currentPage * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, Settings.settingsDefinitions.length);
@@ -38,6 +37,24 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
         custom_id: `toggle_${setting.key}`,
         label: value ? "Enabled" : "Disabled",
         style: value ? ButtonStyle.Success : ButtonStyle.Danger
+      });
+    } else if (setting.type === "channel") {
+      actionRow.components.push({
+        type: ComponentType.ChannelSelect,
+        custom_id: `select_${setting.key}`,
+        placeholder: "Select Channels...",
+        min_values: 0,
+        max_values: 25,
+        default_values: Array.isArray(value) ? value.map(id => ({ id, type: 'channel' })) : []
+      });
+    } else if (setting.type === "role") {
+      actionRow.components.push({
+        type: ComponentType.RoleSelect,
+        custom_id: `select_${setting.key}`,
+        placeholder: "Select Roles...",
+        min_values: 0,
+        max_values: 25,
+        default_values: Array.isArray(value) ? value.map(id => ({ id, type: 'role' })) : []
       });
     } else if (setting.type === "string" && Array.isArray(setting.enum)) {
       actionRow.components.push({

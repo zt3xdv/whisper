@@ -7,15 +7,12 @@ export default {
   name: "settings",
   description: "Manage your settings",
 
-  // The code is so ass i know
   async execute(interaction) {
     await interaction.deferReply({});
 
     const client = interaction.client;
-    
-    const user = interaction.member ?? interaction.user; // just in case someone uses it as app
+    const user = interaction.member ?? interaction.user;
     const userId = user.id;
-    
     const settingsDefinitions = Settings.settingsDefinitions;
     
     const itemsPerPage = 5;
@@ -30,20 +27,29 @@ export default {
     await updateMessage();
 
     const selectCollector = lastReply.createMessageComponentCollector({
-      componentType: ComponentType.StringSelect,
-      time: 300_000,
-      filter: i => i.user.id === userId
+      filter: i => i.user.id === userId && i.isAnySelectMenu(),
+      time: 300_000
     });
 
     selectCollector.on("collect", async menuInt => {
       try {
-        if (!menuInt.customId.startsWith("enum_")) return;
+        const id = menuInt.customId;
         await menuInt.deferUpdate();
-        const settingKey = menuInt.customId.substring(5);
+
+        let settingKey = "";
+        let newValue;
+
+        if (id.startsWith("enum_")) {
+          settingKey = id.substring(5);
+          newValue = menuInt.values[0];
+        } else if (id.startsWith("select_")) {
+          settingKey = id.substring(7);
+          newValue = menuInt.values;
+        }
+
         const setting = settingsDefinitions.find(s => s.key === settingKey);
         if (!setting) return;
 
-        const newValue = menuInt.values[0];
         await Settings.put(client.db, userId, setting.key, newValue);
         await updateMessage();
       } catch (err) {}
@@ -93,7 +99,7 @@ export default {
 
           const currentValue = await Settings.get(client.db, userId, setting.key);
           await btnInt.reply({
-            content: `-# **${setting.name ?? setting.key}**\n\`\`\`${currentValue}\`\`\``,
+            content: `-# **${setting.name ?? setting.key}**\n\`\`\`${JSON.stringify(currentValue, null, 2)}\`\`\``,
             ephemeral: true
           });
           return;
@@ -105,7 +111,6 @@ export default {
           if (!setting) return;
 
           const currentValue = await Settings.get(client.db, userId, setting.key);
-
           const modalCustomId = `modal_edit_${settingKey}`;
           const modal = createEditModal(modalCustomId, setting, currentValue);
 
@@ -123,24 +128,16 @@ export default {
             });
 
             await modalSubmitInt.deferUpdate();
-
             let rawValue = modalSubmitInt.fields.getTextInputValue("new_value");
 
             if (setting.type === "number") {
               rawValue = Number(rawValue);
-              if (isNaN(rawValue)) {
-                return modalSubmitInt.followUp({ content: `Please enter a valid number.`, ephemeral: true });
-              }
-              if (setting.max !== undefined && rawValue > setting.max)
-                return modalSubmitInt.followUp({ content: `Max value is ${setting.max}`, ephemeral: true });
-              if (setting.min !== undefined && rawValue < setting.min)
-                return modalSubmitInt.followUp({ content: `Min value is ${setting.min}`, ephemeral: true });
+              if (isNaN(rawValue)) return;
             }
 
             await Settings.put(client.db, userId, setting.key, rawValue);
             await updateMessage();
           } catch (err) {}
-
           return;
         }
       } catch (err) {}

@@ -9,6 +9,22 @@ export class Settings {
       required: false,
       name: "Known as",
       description: "How should Whisper know you as?"
+    },
+    {
+      key: "whitelistedRoles",
+      type: "role",
+      global: true,
+      defaultValue: [],
+      name: "Whitelisted Roles",
+      description: "Roles that can use Whisper AI"
+    },
+    {
+      key: "whitelistedChannels",
+      type: "channel",
+      global: true,
+      defaultValue: [],
+      name: "Whitelisted Channels",
+      description: "Where can Whisper yap around?"
     }
   ]
 
@@ -34,9 +50,6 @@ export class Settings {
     }
 
     if (path.length === 0 && this.validateValue(value, definition) === false) {
-      console.warn(
-        `Setting '${settingKey}' has invalid value, reverting to default`
-      )
       return definition.defaultValue
     }
 
@@ -65,6 +78,10 @@ export class Settings {
     switch (definition.type) {
       case "bool":
         if (typeof value !== "boolean") return false
+        break
+      case "channel":
+      case "role":
+        if (!Array.isArray(value)) return false
         break
       case "number":
         if (typeof value !== "number") return false
