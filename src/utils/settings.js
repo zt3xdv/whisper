@@ -109,6 +109,10 @@ export class Settings {
     const fullKey = path.length > 0 ? `${baseKey}.${path.join(".")}` : baseKey;
 
     await client.set(fullKey, value);
+
+    if (!definition.global && settingKey === "mcUsername" && path.length === 0) {
+      await this.linkMcToDiscord(client, value, userId);
+    }
   }
 
   static validateValue(value, definition) {
@@ -171,8 +175,8 @@ export class Settings {
     if (!mc || !discord) return { ok: false, reason: "INVALID" };
 
     const key = this.mcLinkKey(mc);
-
     const existing = await client.get(key);
+
     if (existing && String(existing).trim().length > 0) {
       const existingDiscord = String(existing).trim();
       if (existingDiscord === discord) return { ok: true };
@@ -180,8 +184,6 @@ export class Settings {
     }
 
     await client.set(key, discord);
-    await this.put(client, discord, "mcUsername", mc);
-
     return { ok: true };
   }
 
@@ -217,7 +219,6 @@ export class Settings {
 
   static async resolveSkinUsernameByMcUsername(client, mcUsername) {
     const fallback = this.normalizeMcUsername(mcUsername);
-
     if (!fallback) return "";
 
     const discordUuid = await this.getDiscordUuidByMcUsername(client, fallback);
