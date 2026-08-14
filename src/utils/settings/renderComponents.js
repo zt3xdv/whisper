@@ -96,6 +96,16 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
 
   if (Settings.settingsDefinitions.length > itemsPerPage) {
     container.components.push({
+      type: ComponentType.Separator,
+      spacing: SeparatorSpacingSize.Large
+    });
+    
+    container.components.push({
+      type: ComponentType.TextDisplay,
+      content: `-# Page **${currentPage + 1}** of **${Math.ceil(Settings.settingsDefinitions.length / itemsPerPage)}**${isStaff(user) ? " • including staff global options" : ""}`
+    });
+
+    container.components.push({
       type: ComponentType.ActionRow,
       components: [
         {
@@ -116,11 +126,6 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
     });
   }
   
-  container.components.push({
-    type: ComponentType.TextDisplay,
-    content: `-# Page ${currentPage + 1} of ${Math.ceil(Settings.settingsDefinitions.length / itemsPerPage)}`
-  });
-
   return {
     components: [container],
     flags: MessageFlags.IsComponentsV2

@@ -25,7 +25,17 @@ export class Settings {
       defaultValue: [],
       name: "Whitelisted Channels",
       description: "Where can Whisper yap around?"
-    }
+    },
+    {
+      key: "maxContextMessages",
+      type: "number",
+      min: 5,
+      max: 40,
+      defaultValue: 30,
+      required: true,
+      name: "Max Context Messages",
+      description: "How much messages can Whisper read since last message"
+    },
   ]
 
   static async get(client, userId, settingKey, ...path) {
