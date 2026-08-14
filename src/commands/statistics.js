@@ -43,7 +43,7 @@ export default {
           components: [
             {
               type: ComponentType.TextDisplay,
-              content: `-# ${emojis.dollar} Top **${type.replace("top_", "")}**\n\n${formatedTop}`,
+              content: `-# ${emojis.pings} Top **${type.replace("top_", "")}**\n\n${formatedTop}`,
             },
           ],
         },
