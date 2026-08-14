@@ -1,5 +1,6 @@
 import { PermissionFlagsBits, MessageFlags, ComponentType, ApplicationCommandOptionType } from "discord.js";
 import { emojis } from "../utils/emojis.js";
+import { Settings } from "../utils/settings.js";
 import config from "../../config.json" with { type: "json" };
 
 export default {
@@ -22,6 +23,7 @@ export default {
       }
     });
     const data = await res.json();
+    const skinUsername = await Settings.get(interaction.client.db, interaction.user.id, "skinUsername");
     
     if (!res.ok) {
       return await interaction.reply({
@@ -56,7 +58,7 @@ export default {
               accessory: {
                 type: ComponentType.Thumbnail,
                 media: {
-                  url: `https://render.crafty.gg/3d/bust/${data.name.toLowerCase()}?width=300&height=360&x=-30&z=50`
+                  url: `https://render.crafty.gg/3d/bust/${skinUsername && skinUsername.length != 0 ? skinUsername : data.name}?width=300&height=360&x=-30&z=50`
                 },
               },
             },

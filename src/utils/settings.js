@@ -11,6 +11,16 @@ export class Settings {
       description: "How should Whisper know you as?"
     },
     {
+      key: "skinUsername",
+      type: "string",
+      min: 1,
+      max: 16,
+      defaultValue: "",
+      required: false,
+      name: "Skin Username",
+      description: "The skin username to use on Minecraft commands"
+    },
+    {
       key: "whitelistedRoles",
       type: "role",
       global: true,
