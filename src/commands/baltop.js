@@ -7,7 +7,7 @@ export default {
   description: "Check ServerAPI balance top",
 
   async execute(interaction) {
-    const res = await fetch(`${config.serverApiBaseUrl}/misc/baltop`, {
+    const res = await fetch(`${config.serverApiBaseUrl}/misc/balancetop`, {
       headers: {
         "Authorization": `Bearer ${config.serverApiToken}`
       }
