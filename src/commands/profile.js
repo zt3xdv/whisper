@@ -12,18 +12,19 @@ export default {
       description: "In game username",
       type: ApplicationCommandOptionType.String,
       required: true,
-    },
+    }
   ],
 
   async execute(interaction) {
     const username = interaction.options.getString("username", true);
+    const skin = interaction.options.getString("skin");
     const res = await fetch(`${config.serverApiBaseUrl}/player/${username}`, {
       headers: {
         "Authorization": `Bearer ${config.serverApiToken}`
       }
     });
     const data = await res.json();
-    const skinUsername = await Settings.get(interaction.client.db, interaction.user.id, "skinUsername");
+    const skinUsername = await Settings.resolveSkinUsernameByMcUsername(interaction.client.db, username);
     
     if (!res.ok) {
       return await interaction.reply({
