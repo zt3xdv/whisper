@@ -62,7 +62,7 @@ export default {
             },
             {
               type: ComponentType.TextDisplay,
-              content: `Mob Kills: ${data.mobKills}\nPlayer Kills: ${data.playerKills}\nTotal Kills: ${data.kills}\nDeaths: ${data.deaths}\n\nBalance: ${data.money}\nPlaytime: ${data.playtime}\nLast seen: ${data.lastSeen} (${data.online ? "Online" : "Offline"})`,
+              content: `Kills: ${data.kills} (${data.mobKills} mobs, ${data.playerKills} players)\nDeaths: ${data.deaths}\n\nBalance: ${data.money}\nPlaytime: ${data.playtime}\nLast seen: ${data.lastSeen} (${data.online ? "Online" : "Offline"})`,
             },
           ],
         },
