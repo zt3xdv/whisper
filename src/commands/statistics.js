@@ -34,7 +34,7 @@ export default {
     const data = await res.json();
     const players = Object.keys(data[type]);
     
-    const formatedTop = players.map(name => `#${players.indexOf(name) + 1} **${name}**: \$${data[type][name].toFixed(2)}`).join("\n");
+    const formatedTop = players.map(name => `#${players.indexOf(name) + 1} **${name}**: ${data[type][name]}`).join("\n");
 
     return await interaction.reply({
       components: [
