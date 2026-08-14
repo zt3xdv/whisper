@@ -7,10 +7,6 @@ import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 
 const defaultSystemPrompt = `You are Whisper, a chill Discord bot in Wispbyte's server. Talk like a normal person in a Discord chat - casual, short replies, no overthinking. Do NOT analyze or narrate what users are doing. Just respond naturally to what they say. Do not use markdown formatting. Do not introduce yourself unless asked. When someone says whisper they are talking to you. The chat history is just context so you know what's going on — respond only to the latest message directed at you. Talk naturally, dont use formal writing if not asked, just chat normally, and make sure to not be threated like a good boy (be mad at it)`;
 
-// Moving to /settings soon
-const maxContextMessages = 30;
-const maxMessageLength = 500;
-
 const ttsCache = []; // [{ messageId, text }]
 
 function getTtsTextForMessageId(messageId) {
@@ -43,7 +39,7 @@ export default {
       
       const channelIds = await Settings.get(message.client.db, "-", "whitelistedChannels");
       const allowedRoles = await Settings.get(message.client.db, "-", "whitelistedRoles");
-      
+
       if (!channelIds.includes(message.channel.id)) return;
 
       const member =
@@ -59,6 +55,9 @@ export default {
       typingInterval = setInterval(() => {
         message.channel.sendTyping().catch(() => {});
       }, 3500);
+      
+      const maxContextMessages = await Settings.get(message.client.db, "-", "maxContextMessages");
+      const maxMessageLength = await Settings.get(message.client.db, "-", "maxMessageLength");
 
       const fetched = await message.channel.messages.fetch({ limit: maxContextMessages });
       const msgs = [...fetched.values()].sort((a, b) => a.createdTimestamp - b.createdTimestamp);
