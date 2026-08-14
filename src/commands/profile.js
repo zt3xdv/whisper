@@ -50,7 +50,7 @@ export default {
               components: [
                 {
                   type: ComponentType.TextDisplay,
-                  content: `-# ${emojis.pings} **${data.name}**'s profile`,
+                  content: `-# ${emojis.person} **${data.name}**'s profile ${data.online ? emojis.online : emojis.offline}`,
                 },
               ],
               accessory: {
@@ -62,7 +62,7 @@ export default {
             },
             {
               type: ComponentType.TextDisplay,
-              content: `**Kills**: ${data.kills} (${data.mobKills} mobs, ${data.playerKills} players)\n**Deaths**: ${data.deaths}\n\n**Balance**: ${data.money}\n**Playtime**: ${data.playtime}\n**Last seen**: ${data.lastSeen}`,
+              content: `**Kills**: ${data.kills} (${data.mobKills} mobs, ${data.playerKills} players)\n**Deaths**: ${data.deaths}\n\n${emojis.dollar} **Balance**: ${data.money}\n${emojis.clock} **Playtime**: ${data.playtime}\n${emojis.calendar} **Last seen**: ${data.lastSeen}`,
             },
           ],
         },
