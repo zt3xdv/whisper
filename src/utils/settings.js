@@ -13,7 +13,7 @@ export class Settings {
     {
       key: "skinUsername",
       type: "string",
-      min: 1,
+      min: 0,
       max: 16,
       defaultValue: "",
       required: false,
