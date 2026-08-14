@@ -15,7 +15,7 @@ export default {
     const data = await res.json();
     const players = Object.keys(data.balances);
     
-    const formatedTop = players.map(name => `#${players.indexOf(name) + 1} - **${name}**: ${data.balances[name]}`).join("\n");
+    const formatedTop = players.map(name => `#${players.indexOf(name) + 1} - **${name}**: ${data.balances[name].toFixed(2)}`).join("\n");
 
     return await interaction.reply({
       components: [

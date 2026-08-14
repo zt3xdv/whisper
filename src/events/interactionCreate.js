@@ -7,7 +7,11 @@ export default {
 
     const command = interaction.client.commands.get(interaction.commandName);
     if (!command) return;
-
-    await command.execute(interaction);
+    
+    try {
+      await command.execute(interaction);
+    } catch (e) {
+      console.error(e);
+    }
   }
 };
