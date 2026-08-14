@@ -56,7 +56,7 @@ export default {
               accessory: {
                 type: ComponentType.Thumbnail,
                 media: {
-                  url: "https://render.crafty.gg/3d/bust/${data.name.toLowerCase()}?width=300&height=360&x=-30&z=50#${data.name.toLowerCase()}"
+                  url: `https://render.crafty.gg/3d/bust/${data.name.toLowerCase()}?width=300&height=360&x=-30&z=50`
                 },
               },
             },
