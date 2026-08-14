@@ -179,7 +179,7 @@ export default {
         return;
       }
 
-      await message.reply(answer);
+      await message.reply({ content: answer, allowedMentions: { parse: [] } });
     } catch (err) {
       console.error(err);
       if (!message.author.bot) {
