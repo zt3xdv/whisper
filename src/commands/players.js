@@ -14,7 +14,7 @@ export default {
     });
     const data = await res.json();
     
-    const playerList = data.players.map(player => player.name).join(",");
+    const playerList = data.count >= 1 ? data.players.map(player => player.name).join(",") : "No players online";
 
     return await interaction.reply({
       components: [
@@ -23,7 +23,7 @@ export default {
           components: [
             {
               type: ComponentType.TextDisplay,
-              content: `-# ${emojis.person} Online **players**\n\n${playerList}`,
+              content: `-# ${emojis.person} **${data.count}** of **${data.max}** Online players\n\n${playerList}`,
             },
           ],
         },
