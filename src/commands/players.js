@@ -14,7 +14,7 @@ export default {
     });
     const data = await res.json();
     
-    const playerList = data.count >= 1 ? data.players.map(player => player.name).join(",") : "No players online";
+    const playerList = data.count >= 1 ? data.players.map(player => player.name).join(", ") : "No players online";
 
     return await interaction.reply({
       components: [
