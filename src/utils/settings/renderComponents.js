@@ -6,7 +6,8 @@ import { emojis } from "../emojis.js"
 export async function buildComponentsV2(client, user, currentPage, itemsPerPage) {
   const startIndex = currentPage * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, Settings.settingsDefinitions.length);
-  const currentSettings = Settings.settingsDefinitions.slice(startIndex, endIndex).filter(setting => !setting.global || isStaff(user));
+  const userSettings = Settings.settingsDefinitions.filter(setting => !setting.global || isStaff(user));
+  const currentSettings = userSettings.slice(startIndex, endIndex);
   
   const container = {
     type: ComponentType.Container,
@@ -94,7 +95,7 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
     }
   }
 
-  if (Settings.settingsDefinitions.length > itemsPerPage) {
+  if (userSettings.length > itemsPerPage) {
     container.components.push({
       type: ComponentType.Separator,
       spacing: SeparatorSpacingSize.Large
@@ -102,7 +103,7 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
     
     container.components.push({
       type: ComponentType.TextDisplay,
-      content: `-# Page **${currentPage + 1}** of **${Math.ceil(currentSettings.length / itemsPerPage)}**${isStaff(user) ? " • including staff global options" : ""}`
+      content: `-# Page **${currentPage + 1}** of **${Math.ceil(userSettings.length / itemsPerPage)}**${isStaff(user) ? " • including staff global options" : ""}`
     });
 
     container.components.push({
@@ -120,7 +121,7 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
           custom_id: "next_page",
           emoji: emojis.right,
           style: ButtonStyle.Secondary,
-          disabled: endIndex >= currentSettings.length
+          disabled: endIndex >= userSettings.length
         }
       ]
     });
