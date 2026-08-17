@@ -24,8 +24,7 @@ export default {
       }
     });
     const data = await res.json();
-    const skinUsername = await Settings.resolveSkinUsernameByMcUsername(interaction.client.db, username);
-    
+
     if (!res.ok) {
       return await interaction.reply({
         components: [
@@ -34,7 +33,7 @@ export default {
             components: [
               {
                 type: ComponentType.TextDisplay,
-                content: `${emojis.exclamation} This player was not found, did you type the username correctly?`
+                content: `${emojis.exclamation} This player was not found, did you type the username correctly?\n-# Note that this command is case-sensitive`
               }
             ]
           }
@@ -59,7 +58,7 @@ export default {
               accessory: {
                 type: ComponentType.Thumbnail,
                 media: {
-                  url: `https://render.crafty.gg/3d/bust/${skinUsername && skinUsername.length != 0 ? skinUsername : data.name}?width=300&height=360&x=-30&z=50`
+                  url: `https://render.crafty.gg/3d/bust/${data.name}?width=300&height=360&x=-30&z=50`
                 },
               },
             },
