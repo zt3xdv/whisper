@@ -102,7 +102,7 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
     
     container.components.push({
       type: ComponentType.TextDisplay,
-      content: `-# Page **${currentPage + 1}** of **${Math.ceil(Settings.settingsDefinitions.length / itemsPerPage)}**${isStaff(user) ? " • including staff global options" : ""}`
+      content: `-# Page **${currentPage + 1}** of **${Math.ceil(currentSettings.length / itemsPerPage)}**${isStaff(user) ? " • including staff global options" : ""}`
     });
 
     container.components.push({
@@ -120,7 +120,7 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
           custom_id: "next_page",
           emoji: emojis.right,
           style: ButtonStyle.Secondary,
-          disabled: endIndex >= Settings.settingsDefinitions.length
+          disabled: endIndex >= currentSettings.length
         }
       ]
     });
