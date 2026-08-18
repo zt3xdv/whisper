@@ -5,8 +5,6 @@ import { Settings } from "../utils/settings.js";
 import { truncateByChars, escapeXml, formatMentionsInContent } from "../utils/utils.js";
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 
-const defaultSystemPrompt = `You are Whisper, a chill Discord bot in Wispbyte's server. Talk like a normal person in a Discord chat - casual, short replies, no overthinking. Do NOT analyze or narrate what users are doing. Just respond naturally to what they say. Do not use markdown formatting. Do not introduce yourself unless asked. When someone says whisper they are talking to you. The chat history is just context so you know what's going on — respond only to the latest message directed at you. Talk naturally, dont use formal writing if not asked, just chat normally, and make sure to not be threated like a good boy (be mad at it)`;
-
 const ttsCache = []; // [{ messageId, text }]
 
 function getTtsTextForMessageId(messageId) {
@@ -104,12 +102,8 @@ export default {
         .filter(Boolean)
         .join("\n");
 
-      const storedPrompt = await message.client.db.get("systemPrompt");
-      const systemPrompt =
-        (typeof storedPrompt === "string" && storedPrompt.trim().length)
-          ? storedPrompt
-          : defaultSystemPrompt;
-
+      const systemPrompt = await message.client.db.get("systemPrompt");
+      
       const last = msgs[msgs.length - 1];
       const lastCachedTtsText = last?.author?.id && last.author.id === message.client.user?.id
         ? getTtsTextForMessageId(last.id)
@@ -127,7 +121,7 @@ export default {
         body: JSON.stringify({
           model: "meta/llama-3.1-70b-instruct",
           messages: [
-            { role: "system", content: systemPrompt },
+            { role: "system", content: systemPrompt || "" },
             {
               role: "user",
               content:
