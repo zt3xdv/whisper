@@ -27,7 +27,6 @@ export default {
   ],
 
   async execute(interaction) {
-    interaction.deferReply();
     const sub = interaction.options.getSubcommand();
     const db = interaction.client.db;
     const replyCmp = (c, f = MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral) =>
@@ -40,7 +39,7 @@ export default {
       if (sub === "create") {
         const name = interaction.options.getString("name", true).slice(0,64);
         const prompt = interaction.options.getString("prompt", true);
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply();
         try {
           const existing = await eleven.voices.search();
           const total = (existing.voices || []).length;
@@ -57,6 +56,7 @@ export default {
 
       if (sub === "list") {
         try {
+          await interaction.deferReply();
           const res = await eleven.voices.search();
           const voices = res.voices || [];
           if (!voices.length) return interaction.editReply({ components: [{ type: ComponentType.Container, components: [{ type: ComponentType.TextDisplay, content: `${emojis.exclamation} No voices found.` }] }], flags: MessageFlags.IsComponentsV2 });
@@ -71,7 +71,7 @@ export default {
 
       if (sub === "set") {
         const id = interaction.options.getString("id", true);
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply();
         try {
           const res = await eleven.voices.search();
           const found = (res.voices || []).some(v => v.voice_id === id);
@@ -86,7 +86,7 @@ export default {
 
       if (sub === "delete") {
         const id = interaction.options.getString("id", true);
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply();
         try {
           await eleven.voices.delete(id);
           const primary = await db.get("tts.primary");
