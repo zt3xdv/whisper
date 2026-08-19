@@ -27,10 +27,11 @@ export default {
   ],
 
   async execute(interaction) {
+    interaction.deferReply();
     const sub = interaction.options.getSubcommand();
     const db = interaction.client.db;
     const replyCmp = (c, f = MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral) =>
-      interaction.reply({ components: [{ type: ComponentType.Container, components: [{ type: ComponentType.TextDisplay, content: c }] }], flags: f });
+      interaction.editReply({ components: [{ type: ComponentType.Container, components: [{ type: ComponentType.TextDisplay, content: c }] }], flags: f });
     if (!isStaff(interaction.member)) return replyCmp(`${emojis.wrong} You do not have permission to use this command.`);
 
     const eleven = new ElevenLabsClient({ apiKey: config.elevenLabsApiKey });
