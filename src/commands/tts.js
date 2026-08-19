@@ -21,8 +21,8 @@ export default {
       { name: "id", type: ApplicationCommandOptionType.String, description: "Voice id", required: true }
     ]},
     { name: "send", type: ApplicationCommandOptionType.Subcommand, description: "Send a TTS message", options: [
-      { name: "id", type: ApplicationCommandOptionType.String, description: "Voice id", required: false },
       { name: "text", type: ApplicationCommandOptionType.String, description: "Text to speak", required: true },
+      { name: "id", type: ApplicationCommandOptionType.String, description: "Voice id", required: false },
     ]},
   ],
 
