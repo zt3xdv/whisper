@@ -41,7 +41,7 @@ export default {
         const prompt = interaction.options.getString("prompt", true);
         await interaction.deferReply();
         try {
-          const preview = await eleven.textToVoice.design({ voiceDescription: prompt, text: "Sample for voice design" });
+          const preview = await eleven.textToVoice.design({ voiceDescription: prompt, text: "Hello! Im Whisper, a cool discord bot that keeps yapping around, ask me anything and i will answer you" });
           const created = await eleven.textToVoice.create({ voiceName: name, generatedVoiceId: preview.generatedVoiceId });
           return interaction.editReply({ components: [{ type: ComponentType.Container, components: [{ type: ComponentType.TextDisplay, content: `${emojis.correct} Voice created: **${name}** - id: \`${created.voiceId}\`` }] }], flags: MessageFlags.IsComponentsV2 });
         } catch (err) {
