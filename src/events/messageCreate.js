@@ -25,7 +25,9 @@ export default {
   async execute(message) {
     let interval;
     try {
-      if (message.author.bot) return;
+      // If its a bot and not Pocket Tool we ignore ir
+      if (message.author.bot && message.author.id != "1489362526880796903") return;
+      
       const mentioned = message.mentions.has(message.client.user);
       const includesWhisper = message.content.toLowerCase().includes("whisper");
       if (!mentioned && !includesWhisper) return;
