@@ -5,6 +5,8 @@ import { Settings } from "../utils/settings.js";
 import { truncateByChars, escapeXml, formatMentionsInContent } from "../utils/utils.js";
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 
+// Big tool
+const allowedUsers = new Set(["1489362526880796903"]);
 const ttsCache = new Map();
 
 function getTts(id) {
@@ -25,8 +27,7 @@ export default {
   async execute(message) {
     let interval;
     try {
-      // If its a bot and not Pocket Tool we ignore ir
-      if (message.author.bot && message.author.id != "1489362526880796903") return;
+      if (message.author.bot && !allowedUsers.has(message.author.id)) return;
       
       const mentioned = message.mentions.has(message.client.user);
       const includesWhisper = message.content.toLowerCase().includes("whisper");
@@ -39,7 +40,7 @@ export default {
       const member = message.guild?.members?.cache?.get(message.author.id) ||
         (await message.guild?.members?.fetch(message.author.id).catch(() => null));
       const allowed = !!member?.roles?.cache?.some(r => roles.includes(r.id) || staffRoleIds.has(r.id));
-      if (!allowed) return;
+      if (!allowed && !allowedUsers.has(message.author.id)) return;
 
       message.channel.sendTyping().catch(() => {});
       interval = setInterval(() => message.channel.sendTyping().catch(() => {}), 3500);
