@@ -41,13 +41,9 @@ export default {
         const prompt = interaction.options.getString("prompt", true);
         await interaction.deferReply();
         try {
-          const existing = await eleven.voices.search();
-          const total = (existing.voices || []).length;
-          if (total >= 3) return interaction.editReply({ components: [{ type: ComponentType.Container, components: [{ type: ComponentType.TextDisplay, content: `${emojis.exclamation} I can only have up to 3 voices` }] }], flags: MessageFlags.IsComponentsV2 });
-
-          const preview = await eleven.textToVoice.design({ voice_description: prompt, text: "Sample for voice design" });
-          const created = await eleven.textToVoice.create({ voice_name: name, generated_voice_id: preview.generated_voice_id });
-          return interaction.editReply({ components: [{ type: ComponentType.Container, components: [{ type: ComponentType.TextDisplay, content: `${emojis.correct} Voice created: **${name}** - id: \`${created.voice_id}\`` }] }], flags: MessageFlags.IsComponentsV2 });
+          const preview = await eleven.textToVoice.design({ voiceDescription: prompt, text: "Sample for voice design" });
+          const created = await eleven.textToVoice.create({ voiceName: name, generatedVoiceId: preview.generatedVoiceId });
+          return interaction.editReply({ components: [{ type: ComponentType.Container, components: [{ type: ComponentType.TextDisplay, content: `${emojis.correct} Voice created: **${name}** - id: \`${created.voiceId}\`` }] }], flags: MessageFlags.IsComponentsV2 });
         } catch (err) {
           console.error(err);
           return interaction.editReply({ components: [{ type: ComponentType.Container, components: [{ type: ComponentType.TextDisplay, content: `${emojis.wrong} Failed to create voice.` }] }], flags: MessageFlags.IsComponentsV2 });
@@ -61,7 +57,7 @@ export default {
           const voices = res.voices || [];
           if (!voices.length) return interaction.editReply({ components: [{ type: ComponentType.Container, components: [{ type: ComponentType.TextDisplay, content: `${emojis.exclamation} No voices found.` }] }], flags: MessageFlags.IsComponentsV2 });
           const primary = await db.get("tts.primary");
-          const lines = voices.map(v => `- **${v.name || v.voice_name || "Unnamed"}** - id: \`${v.voice_id}\`${primary === v.voice_id ? " • primary" : ""}\n  ${String(v.description || "").slice(0,120).replace(/\n/g," ")}${(v.description||"").length>120?"…":""}`);
+          const lines = voices.map(v => `- **${v.name || "Unnamed"}** - id: \`${v.voiceId}\`${primary === v.voiceId ? " • primary" : ""}\n  ${String(v.description || "").slice(0,120).replace(/\n/g," ")}${(v.description||"").length>120?"…":""}`);
           return interaction.editReply({ components: [{ type: ComponentType.Container, components: [{ type: ComponentType.TextDisplay, content: `-# ${emojis.person} **Voices** (total: ${voices.length})\n\n${lines.join("\n")}` }] }], flags: MessageFlags.IsComponentsV2 });
         } catch (err) {
           console.error(err);
@@ -74,7 +70,7 @@ export default {
         await interaction.deferReply();
         try {
           const res = await eleven.voices.search();
-          const found = (res.voices || []).some(v => v.voice_id === id);
+          const found = (res.voices || []).some(v => v.voiceId === id);
           if (!found) return interaction.editReply({ components: [{ type: ComponentType.Container, components: [{ type: ComponentType.TextDisplay, content: `${emojis.exclamation} Voice not found: \`${id}\`` }] }], flags: MessageFlags.IsComponentsV2 });
           await db.set("tts.primary", id);
           return interaction.editReply({ components: [{ type: ComponentType.Container, components: [{ type: ComponentType.TextDisplay, content: `${emojis.correct} Primary voice set to \`${id}\`` }] }], flags: MessageFlags.IsComponentsV2 });
