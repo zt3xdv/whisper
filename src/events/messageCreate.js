@@ -30,12 +30,13 @@ export default {
       if (message.author.bot && !allowedUsers.has(message.author.id)) return;
 
       const content = message.content.toLowerCase();
-      if (message.channel.id === "1112023292333785120" && (content.includes("help") || content.includes("support"))) {
+      const asksForSupport = /(?:\b(?:can|could|would|may|please|need|want|require|get|looking for|could use|use some|is there|any chance|someone|anyone|somebody|having|stuck|trouble|issue|problem|question)\b.*\b(?:help|support|assistance)\b|\b(?:help|support|assistance)\b.*\b(?:me|us|please|someone|anyone|somebody|with|on|for)\b)/.test(content);
+      if (message.channel.id === "1112023292333785120" && asksForSupport) {
         await message.reply({
           content: "https://wispbyte.com/community",
           embeds: [{
             image: {
-              url: "https://cdn.discordapp.com/attachments/1112023292333785120/1541398709382676480/NoGeneralYesCommunityByRoblord.gif"
+              url: "https://cdn.discordapp.com/attachments/1112023292333785120/1541410111199907850/mf558s6.gif?ex=6a8d7d88&is=6a8c2c08&hm=ad76e99b5fc35c02cfa3d733d101fd3de1b03602c9683d8f6f36044b48a9b6c5&"
             }
           }]
         });
