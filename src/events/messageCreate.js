@@ -28,6 +28,19 @@ export default {
     let interval;
     try {
       if (message.author.bot && !allowedUsers.has(message.author.id)) return;
+
+      const content = message.content.toLowerCase();
+      if (message.channel.id === "1112023292333785120" && (content.includes("help") || content.includes("support"))) {
+        await message.reply({
+          content: "https://wispbyte.com/community",
+          embeds: [{
+            image: {
+              url: "https://cdn.discordapp.com/attachments/1112023292333785120/1541398709382676480/NoGeneralYesCommunityByRoblord.gif"
+            }
+          }]
+        });
+        return;
+      }
       
       const mentioned = message.mentions.has(message.client.user);
       const includesWhisper = message.content.toLowerCase().includes("whisper");
