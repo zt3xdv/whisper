@@ -6,5 +6,6 @@
   "telegramChatId": "telegram_forwarding_chat_id",
   "elevenLabsApiKey": "eleven_labs_tts_api_key",
   "serverApiBaseUrl": "server_api_base_url",
-  "serverApiToken": "server_api_token"
+  "serverApiToken": "server_api_token",
+  "tavilyApiKey": "tavily_api_key"
 }
