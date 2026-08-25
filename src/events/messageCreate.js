@@ -47,6 +47,7 @@ export default {
 
       const maxCtx = await Settings.get(message.client.db, "-", "maxContextMessages");
       const maxLen = await Settings.get(message.client.db, "-", "maxMessageLength");
+      const maxToolCalls = await Settings.get(message.client.db, "-", "maxToolCalls");
 
       const fetched = await message.channel.messages.fetch({ limit: maxCtx });
       const msgs = [...fetched.values()].sort((a, b) => a.createdTimestamp - b.createdTimestamp);
@@ -141,14 +142,17 @@ export default {
           content:
             `Chat history (context):\n${contextXml}\n\n` +
             `Latest message: ${escapeXml(lastContent)}\n\n` +
-            `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked, and yes, you can send voice messages).`
+            `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message.`
         }
       ];
 
       let answer = "";
       let isRunning = true;
+      let toolCallCount = 0;
 
       while (isRunning) {
+        const reachedLimit = toolCallCount >= maxToolCalls;
+
         const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
           method: "POST",
           headers: {
@@ -158,8 +162,8 @@ export default {
           body: JSON.stringify({
             model: "meta/llama-3.1-70b-instruct",
             messages: apiMessages,
-            tools: toolDefinitions,
-            tool_choice: "auto",
+            tools: reachedLimit ? undefined : toolDefinitions,
+            tool_choice: reachedLimit ? "none" : "auto",
             max_tokens: 512,
             temperature: 0.6
           })
@@ -173,7 +177,7 @@ export default {
         const data = await response.json();
         const messageRes = data.choices?.[0]?.message;
 
-        if (messageRes.tool_calls) {
+        if (messageRes.tool_calls && !reachedLimit) {
           apiMessages.push(messageRes);
           for (const toolCall of messageRes.tool_calls) {
             const toolOutput = await runTool(toolCall);
@@ -182,6 +186,15 @@ export default {
               tool_call_id: toolCall.id,
               name: toolCall.function.name,
               content: toolOutput
+            });
+          }
+          
+          toolCallCount++;
+          
+          if (toolCallCount >= maxToolCalls) {
+            apiMessages.push({
+              role: "system",
+              content: "System notice: Maximum tool calls reached. You must provide a final answer based on the available information now. Do not attempt to use any more tools."
             });
           }
         } else {

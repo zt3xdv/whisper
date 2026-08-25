@@ -48,6 +48,17 @@ export class Settings {
       name: "Max Message Length",
       description: "Max length of the messages that Whisper will read"
     },
+    {
+      key: "maxToolCalls",
+      type: "number",
+      min: 1,
+      max: 20,
+      global: true,
+      defaultValue: 5,
+      required: true,
+      name: "Max Tool Calls",
+      description: "How much tools can Whisper use before getting a response"
+    },
   ]
 
   static async get(client, userId, settingKey, ...path) {
