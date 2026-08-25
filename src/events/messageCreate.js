@@ -4,8 +4,8 @@ import { staffRoleIds } from "../utils/staff.js";
 import { Settings } from "../utils/settings.js";
 import { truncateByChars, escapeXml, formatMentionsInContent } from "../utils/utils.js";
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
-import { toolDefinitions, runTool } from "../utils/tools.js";
 
+// Big tool
 const allowedUsers = new Set(["1489362526880796903"]);
 const ttsCache = new Map();
 
@@ -47,7 +47,6 @@ export default {
 
       const maxCtx = await Settings.get(message.client.db, "-", "maxContextMessages");
       const maxLen = await Settings.get(message.client.db, "-", "maxMessageLength");
-      const maxToolCalls = await Settings.get(message.client.db, "-", "maxToolCalls");
 
       const fetched = await message.channel.messages.fetch({ limit: maxCtx });
       const msgs = [...fetched.values()].sort((a, b) => a.createdTimestamp - b.createdTimestamp);
@@ -135,75 +134,36 @@ export default {
       const lastSource = lastCached ?? (last?.content ?? "");
       const lastContent = truncateByChars(formatMentionsInContent(lastSource, last), maxLen);
 
-      let apiMessages = [
-        { role: "system", content: systemPrompt || "" },
-        {
-          role: "user",
-          content:
-            `Chat history (context):\n${contextXml}\n\n` +
-            `Latest message: ${escapeXml(lastContent)}\n\n` +
-            `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message.`
-        }
-      ];
+      const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${config.nvidiaApiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "meta/llama-3.1-70b-instruct",
+          messages: [
+            { role: "system", content: systemPrompt || "" },
+            {
+              role: "user",
+              content:
+                `Chat history (context):\n${contextXml}\n\n` +
+                `Latest message: ${escapeXml(lastContent)}\n\n` +
+                `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked, and yes, you can send voice messages), if asked to send a voice [...]`
+            }
+          ],
+          max_tokens: 512,
+          temperature: 0.6
+        })
+      });
 
-      let answer = "";
-      let isRunning = true;
-      let toolCallCount = 0;
-
-      while (isRunning) {
-        const reachedLimit = toolCallCount >= maxToolCalls;
-
-        const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${config.nvidiaApiKey}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            model: "meta/llama-3.1-70b-instruct",
-            messages: apiMessages,
-            tools: reachedLimit ? undefined : toolDefinitions,
-            tool_choice: reachedLimit ? "none" : "auto",
-            max_tokens: 512,
-            temperature: 0.6
-          })
-        });
-
-        if (!response.ok) {
-          const text = await response.text().catch(() => "");
-          throw new Error(`Request failed: ${response.status} ${text}`.trim());
-        }
-
-        const data = await response.json();
-        const messageRes = data.choices?.[0]?.message;
-
-        if (messageRes.tool_calls && !reachedLimit) {
-          apiMessages.push(messageRes);
-          for (const toolCall of messageRes.tool_calls) {
-            const toolOutput = await runTool(toolCall);
-            apiMessages.push({
-              role: "tool",
-              tool_call_id: toolCall.id,
-              name: toolCall.function.name,
-              content: toolOutput
-            });
-          }
-          
-          toolCallCount++;
-          
-          if (toolCallCount >= maxToolCalls) {
-            apiMessages.push({
-              role: "system",
-              content: "System notice: Maximum tool calls reached. You must provide a final answer based on the available information now. Do not attempt to use any more tools."
-            });
-          }
-        } else {
-          answer = (messageRes.content || "").trim();
-          isRunning = false;
-        }
+      if (!response.ok) {
+        const text = await response.text().catch(() => "");
+        throw new Error(`Request failed: ${response.status} ${text}`.trim());
       }
-      
-      if (!answer) answer = "I couldn't generate a response.";
+
+      const data = await response.json();
+      const answer = (data.choices?.[0]?.message?.content || "").trim() || "I couldn't generate a response.";
 
       if (answer.includes("%tts%")) {
         const client = new ElevenLabsClient({ apiKey: config.elevenLabsApiKey });
