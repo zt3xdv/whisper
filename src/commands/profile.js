@@ -64,7 +64,7 @@ export default {
             },
             {
               type: ComponentType.TextDisplay,
-              content: `**Kills**: ${data.kills} (${data.mobKills} mobs, ${data.playerKills} players)\n**Deaths**: ${data.deaths}\n\n${emojis.dollar} **Balance**: ${data.money}\n${emojis.clock} **Playtime**: ${data.playtime}\n${emojis.calendar} **Last seen**: ${data.lastSeen}`,
+              content: `**Kills**: ${data.kills} (${data.mobKills} mobs, ${data.playerKills} players)\n**Deaths**: ${data.deaths}\n\n${emojis.clock} **Playtime**: ${data.playtime}\n${emojis.calendar} **Last seen**: ${data.lastSeen}`,
             },
           ],
         },
