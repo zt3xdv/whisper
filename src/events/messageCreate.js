@@ -22,6 +22,108 @@ function setTts(id, text) {
   }
 }
 
+// Ephemeral ai provider
+const ephemeralAiProvider = {
+  url: "",
+  authorization: "",
+  model: "",
+  maxTokens: 512,
+  isCustom: false,
+};
+export function setEphemeralAiProvider(url, authorization, model, maxTokens) {
+  ephemeralAiProvider.url = url;
+  ephemeralAiProvider.authorization = authorization && authorization !== '' ? authorization : null;
+  ephemeralAiProvider.model = model;
+  ephemeralAiProvider.maxTokens = maxTokens ?? 512;
+  ephemeralAiProvider.isCustom = true;
+}
+export function resetEphemeralAiProvider() {
+  ephemeralAiProvider.url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+  ephemeralAiProvider.authorization = config.nvidiaApiKey;
+  ephemeralAiProvider.model = 'meta/llama-3.1-70b-instruct';
+  ephemeralAiProvider.maxTokens = 512;
+  ephemeralAiProvider.isCustom = false;
+}
+resetEphemeralAiProvider();
+async function fetchAiCompletion(systemPrompt, context, lastMessage) {
+  if (ephemeralAiProvider.isCustom) { // fallback stuff so that if custom url fails it goes back to default
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const timeout = setTimeout(controller.abort, 5000);
+
+    try {
+      const response = await fetch(ephemeralAiProvider.url, {
+        method: "POST",
+        headers: {
+          Authorization: ephemeralAiProvider.authorization ? `Bearer ${ephemeralAiProvider.authorization}` : null,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: ephemeralAiProvider.model,
+          messages: [
+            { role: "system", content: systemPrompt || "" },
+            {
+              role: "user",
+              content:
+                `Chat history (context):\n${context}\n\n` +
+                `Latest message: ${lastMessage}\n\n` +
+                `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked, and yes, you can send voice messages), if asked to send a voice [...]`
+            }
+          ],
+          max_tokens: ephemeralAiProvider.maxTokens,
+          temperature: 0.6
+        }),
+        signal: signal,
+      });
+
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        console.warn('Failed to fetch from custom url, resetting back to default and reattempting');
+        resetEphemeralAiProvider();
+        return fetchAiCompletion(systemPrompt, context, lastMessage);
+      }
+
+      return response;
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.warn('Custom url timed out, resetting back to default and reattempting');
+        resetEphemeralAiProvider();
+        return fetchAiCompletion(systemPrompt, context, lastMessage);
+      }
+      else {
+        throw error;
+      }
+    }
+
+  }
+  else {
+    return fetch(ephemeralAiProvider.url, {
+      method: "POST",
+      headers: {
+        Authorization: ephemeralAiProvider.authorization ? `Bearer ${ephemeralAiProvider.authorization}` : null,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: ephemeralAiProvider.model,
+        messages: [
+          { role: "system", content: systemPrompt || "" },
+          {
+            role: "user",
+            content:
+              `Chat history (context):\n${context}\n\n` +
+              `Latest message: ${lastMessage}\n\n` +
+              `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked, and yes, you can send voice messages), if asked to send a voice [...]`
+          }
+        ],
+        max_tokens: ephemeralAiProvider.maxTokens,
+        temperature: 0.6
+      }),
+    });
+  }
+}
+
 export default {
   name: Events.MessageCreate,
   async execute(message) {
@@ -134,28 +236,7 @@ export default {
       const lastSource = lastCached ?? (last?.content ?? "");
       const lastContent = truncateByChars(formatMentionsInContent(lastSource, last), maxLen);
 
-      const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${config.nvidiaApiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "meta/llama-3.1-70b-instruct",
-          messages: [
-            { role: "system", content: systemPrompt || "" },
-            {
-              role: "user",
-              content:
-                `Chat history (context):\n${contextXml}\n\n` +
-                `Latest message: ${escapeXml(lastContent)}\n\n` +
-                `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked, and yes, you can send voice messages), if asked to send a voice [...]`
-            }
-          ],
-          max_tokens: 512,
-          temperature: 0.6
-        })
-      });
+      const response = await fetchAiCompletion(systemPrompt, contextXml, escapeXml(lastContent));
 
       if (!response.ok) {
         const text = await response.text().catch(() => "");
