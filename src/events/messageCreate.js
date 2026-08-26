@@ -38,7 +38,7 @@ export function setEphemeralAiProvider(url, authorization, model, maxTokens) {
   ephemeralAiProvider.isCustom = true;
 }
 export function resetEphemeralAiProvider() {
-  ephemeralAiProvider.url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+  ephemeralAiProvider.url = 'https://integrate.api.nvidia.com/v1';
   ephemeralAiProvider.authorization = config.nvidiaApiKey;
   ephemeralAiProvider.model = 'deepseek-ai/deepseek-v4-flash-0731';
   ephemeralAiProvider.maxTokens = 512;
