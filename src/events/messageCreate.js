@@ -50,7 +50,7 @@ async function fetchAiCompletion(systemPrompt, context, lastMessage) {
     const controller = new AbortController();
     const { signal } = controller;
 
-    const timeout = setTimeout(controller.abort, 5000);
+    const timeout = setTimeout(controller.abort, 30000); // 30 seconds
 
     try {
       const response = await fetch(ephemeralAiProvider.url, {
