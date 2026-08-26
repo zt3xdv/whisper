@@ -62,7 +62,7 @@ export default {
       const maxTokens = interaction.options.getInteger('maxtokens');
       console.log(url);
 
-      setEphemeralAiProvider(url, model, auth, maxTokens);
+      setEphemeralAiProvider(url, auth, model, maxTokens);
 
       interaction.reply({ content: 'Changed AI provider. This will reset on restart or failed response', flags: 'Ephemeral' });
     }
