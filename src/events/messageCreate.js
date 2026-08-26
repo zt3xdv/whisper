@@ -93,6 +93,7 @@ async function fetchAiCompletion(systemPrompt, context, lastMessage) {
         return fetchAiCompletion(systemPrompt, context, lastMessage);
       }
       else {
+        clearTimeout(timeout);
         throw error;
       }
     }

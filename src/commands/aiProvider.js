@@ -60,6 +60,7 @@ export default {
       const model = interaction.options.getString('model');
       const auth = interaction.options.getString('authorization') ?? null;
       const maxTokens = interaction.options.getInteger('maxtokens');
+      console.log(url);
 
       setEphemeralAiProvider(url, model, auth, maxTokens);
 
