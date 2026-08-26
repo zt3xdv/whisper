@@ -47,11 +47,6 @@ export function resetEphemeralAiProvider() {
 resetEphemeralAiProvider();
 async function fetchAiCompletion(systemPrompt, context, lastMessage) {
   if (ephemeralAiProvider.isCustom) { // fallback stuff so that if custom url fails it goes back to default
-    const controller = new AbortController();
-    const { signal } = controller;
-
-    const timeout = setTimeout(controller.abort, 30000); // 30 seconds
-
     try {
       const response = await fetch(ephemeralAiProvider.url, {
         method: "POST",
@@ -74,10 +69,9 @@ async function fetchAiCompletion(systemPrompt, context, lastMessage) {
           max_tokens: ephemeralAiProvider.maxTokens,
           temperature: 0.6
         }),
-        signal: signal,
+        signal: AbortSignal.timeout(60_000),
       });
 
-      clearTimeout(timeout);
 
       if (!response.ok) {
         console.warn('Failed to fetch from custom url, resetting back to default and reattempting');
@@ -87,13 +81,12 @@ async function fetchAiCompletion(systemPrompt, context, lastMessage) {
 
       return response;
     } catch (error) {
-      if (error.name === 'AbortError') {
+      if (error.name === 'TimeoutError') {
         console.warn('Custom url timed out, resetting back to default and reattempting');
         resetEphemeralAiProvider();
         return fetchAiCompletion(systemPrompt, context, lastMessage);
       }
       else {
-        clearTimeout(timeout);
         throw error;
       }
     }
