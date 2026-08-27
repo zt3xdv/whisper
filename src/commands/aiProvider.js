@@ -1,7 +1,7 @@
 import { MessageFlags, ComponentType, ApplicationCommandOptionType } from "discord.js";
 import { emojis } from "../utils/emojis.js";
 import { isStaff } from "../utils/staff.js";
-import { resetEphemeralAiProvider, setEphemeralAiProvider } from '../events/messageCreate.js';
+import * as MessageCreate from '../events/messageCreate.js';
 
 export default {
   name: "aiprovider",
@@ -61,12 +61,12 @@ export default {
       const auth = interaction.options.getString('authorization') ?? null;
       const maxTokens = interaction.options.getInteger('maxtokens');
 
-      setEphemeralAiProvider(url, auth, model, maxTokens);
+      MessageCreate.setEphemeralAiProvider(url, auth, model, maxTokens);
 
       interaction.reply({ content: 'Changed AI provider. This will reset on restart or failed response', flags: 'Ephemeral' });
     }
     else if (subcommand === 'reset') {
-      resetEphemeralAiProvider();
+      MessageCreate.resetEphemeralAiProvider();
       interaction.reply({ content: 'Reset AI provider to default', flags: 'Ephemeral' });
     }
     else {
