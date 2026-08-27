@@ -2,32 +2,125 @@ import { Events } from "discord.js";
 import config from "../../config.json" with { type: "json" };
 import { staffRoleIds } from "../utils/staff.js";
 import { Settings } from "../utils/settings.js";
+import { truncateByChars, escapeXml, formatMentionsInContent } from "../utils/utils.js";
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
-import * as Utils from "../utils/utils.js";
 
+// Big tool
 const allowedUsers = new Set(["1489362526880796903"]);
+const ttsCache = new Map();
+
+function getTts(id) {
+  return ttsCache.get(id) ?? null;
+}
+
+function setTts(id, text) {
+  if (!text) return;
+  ttsCache.set(id, text);
+  while (ttsCache.size > 30) {
+    const firstKey = ttsCache.keys().next().value;
+    ttsCache.delete(firstKey);
+  }
+}
+
+// Ephemeral ai provider
+const ephemeralAiProvider = {
+  url: "",
+  authorization: "",
+  model: "",
+  maxTokens: 512,
+  isCustom: false,
+};
+export function setEphemeralAiProvider(url, authorization, model, maxTokens) {
+  ephemeralAiProvider.url = url;
+  ephemeralAiProvider.authorization = authorization && authorization !== '' ? authorization : null;
+  ephemeralAiProvider.model = model;
+  ephemeralAiProvider.maxTokens = maxTokens ?? 512;
+  ephemeralAiProvider.isCustom = true;
+}
+export function resetEphemeralAiProvider() {
+  ephemeralAiProvider.url = 'https://integrate.api.nvidia.com/v1/chat/completions';
+  ephemeralAiProvider.authorization = config.nvidiaApiKey;
+  ephemeralAiProvider.model = 'deepseek-ai/deepseek-v4-flash-0731';
+  ephemeralAiProvider.maxTokens = 512;
+  ephemeralAiProvider.isCustom = false;
+}
+resetEphemeralAiProvider();
+async function fetchAiCompletion(systemPrompt, context, lastMessage) {
+  if (ephemeralAiProvider.isCustom) { // fallback stuff so that if custom url fails it goes back to default
+    try {
+      const response = await fetch(ephemeralAiProvider.url, {
+        method: "POST",
+        headers: {
+          Authorization: ephemeralAiProvider.authorization ? `Bearer ${ephemeralAiProvider.authorization}` : null,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: ephemeralAiProvider.model,
+          messages: [
+            { role: "system", content: systemPrompt || "" },
+            {
+              role: "user",
+              content:
+                `Chat history (context):\n${context}\n\n` +
+                `Latest message: ${lastMessage}\n\n` +
+                `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked, and yes, you can send voice messages), if asked to send a voice [...]`
+            }
+          ],
+          max_tokens: ephemeralAiProvider.maxTokens,
+          temperature: 0.6
+        }),
+        signal: AbortSignal.timeout(60_000),
+      });
+
+
+      if (!response.ok) {
+        console.warn('Failed to fetch from custom url, resetting back to default and reattempting');
+        resetEphemeralAiProvider();
+        return fetchAiCompletion(systemPrompt, context, lastMessage);
+      }
+
+      return response;
+    } catch (error) {
+      if (error.name === 'TimeoutError') {
+        console.warn('Custom url timed out, resetting back to default and reattempting');
+        resetEphemeralAiProvider();
+        return fetchAiCompletion(systemPrompt, context, lastMessage);
+      }
+      else {
+        throw error;
+      }
+    }
+
+  }
+  else {
+    return fetch(ephemeralAiProvider.url, {
+      method: "POST",
+      headers: {
+        Authorization: ephemeralAiProvider.authorization ? `Bearer ${ephemeralAiProvider.authorization}` : null,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: ephemeralAiProvider.model,
+        messages: [
+          { role: "system", content: systemPrompt || "" },
+          {
+            role: "user",
+            content:
+              `Chat history (context):\n${context}\n\n` +
+              `Latest message: ${lastMessage}\n\n` +
+              `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked, and yes, you can send voice messages), if asked to send a voice [...]`
+          }
+        ],
+        max_tokens: ephemeralAiProvider.maxTokens,
+        temperature: 0.6
+      }),
+    });
+  }
+}
 
 export default {
   name: Events.MessageCreate,
-
-  setEphemeralAiProvider(url, authorization, model, maxTokens) {
-    Utils.ephemeralAiProvider.url = url;
-    Utils.ephemeralAiProvider.authorization = authorization && authorization !== '' ? authorization : null;
-    Utils.ephemeralAiProvider.model = model;
-    Utils.ephemeralAiProvider.maxTokens = maxTokens ?? 512;
-    Utils.ephemeralAiProvider.isCustom = true;
-  },
-
-  resetEphemeralAiProvider() {
-    Utils.ephemeralAiProvider.url = 'https://integrate.api.nvidia.com/v1/chat/completions';
-    Utils.ephemeralAiProvider.authorization = config.nvidiaApiKey;
-    Utils.ephemeralAiProvider.model = 'deepseek-ai/deepseek-v4-flash-0731';
-    Utils.ephemeralAiProvider.maxTokens = 512;
-    Utils.ephemeralAiProvider.isCustom = false;
-  },
-
   async execute(message) {
-    if (!Utils.ephemeralAiProvider.url) this.resetEphemeralAiProvider();
     let interval;
     try {
       if (message.author.bot && !allowedUsers.has(message.author.id)) return;
@@ -62,25 +155,82 @@ export default {
         uniqueIds.forEach((id, i) => knownAs.set(id, aliases[i] ?? ""));
       }
 
+      async function buildXml(m) {
+        const author = m.author ?? {};
+        const authorId = author.id ?? "";
+        const alias = knownAs.get(authorId) ?? "";
+        const displayName = m.client?.user && authorId === m.client.user.id
+          ? m.client.user.username
+          : (alias && alias !== "none" ? alias : (m.member?.displayName || author.username || ""));
+        const cached = (m.client?.user && authorId === m.client.user.id) ? getTts(m.id) : null;
+        const raw = cached ?? (m.content ?? "");
+        const text = truncateByChars(formatMentionsInContent(raw, m), maxLen);
+        const time = m.createdTimestamp ? new Date(m.createdTimestamp).toISOString() : "";
+        const username = author.username ?? "";
+        const avatar = author.displayAvatarURL ? author.displayAvatarURL({ dynamic: true }) : "";
+
+        let replyXml = "";
+        const refId = m.reference?.messageId ?? m.referencedMessage?.id;
+        if (refId) {
+          let ref = msgsById.get(refId);
+          if (!ref) {
+            try {
+              ref = await m.channel.messages.fetch(refId);
+            } catch {
+              ref = null;
+            }
+          }
+          if (ref) {
+            const rAuth = ref.author ?? {};
+            const rId = rAuth.id ?? "";
+            const rCached = (ref.client?.user && rId === ref.client.user.id) ? getTts(ref.id) : null;
+            const rRaw = rCached ?? (ref.content ?? "");
+            const rText = truncateByChars(formatMentionsInContent(rRaw, ref), maxLen);
+            const rTime = ref.createdTimestamp ? new Date(ref.createdTimestamp).toISOString() : "";
+            const rUser = rAuth.username ?? "";
+            const rAvatar = rAuth.displayAvatarURL ? rAuth.displayAvatarURL({ dynamic: true }) : "";
+
+            replyXml =
+              `  <replyTo>\n` +
+              `    <authorId>${escapeXml(rId)}</authorId>\n` +
+              `    <username>${escapeXml(rUser)}</username>\n` +
+              `    <displayName>${escapeXml(ref.member?.displayName || rUser)}</displayName>\n` +
+              `    <avatarUrl>${escapeXml(rAvatar)}</avatarUrl>\n` +
+              `    <time>${rTime}</time>\n` +
+              `    <text>${escapeXml(rText)}</text>\n` +
+              `  </replyTo>\n`;
+          } else {
+            replyXml =
+              `  <replyTo>\n` +
+              `    <missing>true</missing>\n` +
+              `  </replyTo>\n`;
+          }
+        }
+
+        return (
+          `<message>\n` +
+          `  <authorId>${escapeXml(authorId)}</authorId>\n` +
+          `  <username>${escapeXml(username)}</username>\n` +
+          `  <displayName>${escapeXml(displayName)}</displayName>\n` +
+          `  <avatarUrl>${escapeXml(avatar)}</avatarUrl>\n` +
+          `  <time>${time}</time>\n` +
+          `  <text>${escapeXml(text)}</text>\n` +
+          (replyXml ? `\n${replyXml}` : "") +
+          `</message>`
+        );
+      }
+
       const parts = [];
-      for (const m of msgs) parts.push(await Utils.buildXml(m, knownAs, maxLen, msgsById));
+      for (const m of msgs) parts.push(await buildXml(m));
       const contextXml = parts.join("\n");
 
       const systemPrompt = await message.client.db.get("systemPrompt");
       const last = msgs[msgs.length - 1];
-      let lastRaw = last?.content ?? "";
-      if (last?.author?.id && last.author.id === message.client.user?.id) {
-        const lastCached = await Utils.getTtsFromDb(message.client.db, last.id);
-        if (lastCached) lastRaw = lastCached;
-      }
-      const lastContent = Utils.truncateByChars(Utils.formatMentionsInContent(lastRaw, last), maxLen);
+      const lastCached = last?.author?.id && last.author.id === message.client.user?.id ? getTts(last.id) : null;
+      const lastSource = lastCached ?? (last?.content ?? "");
+      const lastContent = truncateByChars(formatMentionsInContent(lastSource, last), maxLen);
 
-      let response = await Utils.fetchAiCompletion(systemPrompt, contextXml, Utils.escapeXml(lastContent));
-
-      if (response.fallback) {
-        this.resetEphemeralAiProvider();
-        response = await Utils.fetchAiCompletion(systemPrompt, contextXml, Utils.escapeXml(lastContent));
-      }
+      const response = await fetchAiCompletion(systemPrompt, contextXml, escapeXml(lastContent));
 
       if (!response.ok) {
         const text = await response.text().catch(() => "");
@@ -101,23 +251,8 @@ export default {
           outputFormat: "opus_48000_192"
         });
         const buffer = Buffer.from(audio.audioBase64, "base64");
-        const replyMsg = await message.reply({
-          attachments: [
-            {
-              id: 0,
-              filename: "tts.opus",
-              waveform: Utils.getRandomWaveform(),
-              duration_secs: 10,
-            },
-          ],
-          files: [
-            {
-              attachment: buffer,
-              name: "tts.opus"
-            }
-          ] 
-        });
-        await Utils.setTtsInDb(message.client.db, replyMsg.id, ttsText);
+        const replyMsg = await message.reply({ files: [{ attachment: buffer, name: "tts.opus" }] });
+        setTts(replyMsg.id, ttsText);
         return;
       }
 
