@@ -56,7 +56,7 @@ export async function fetchAiCompletion(systemPrompt, context, lastMessage) {
         content:
           `Chat history (context):\n${context}\n\n` +
           `Latest message: ${lastMessage}\n\n` +
-          `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked, and yes, you can send voice messages), if asked to send a voice [...]`
+          `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (TTS of you original text)`
       }
     ],
     max_tokens: ephemeralAiProvider.maxTokens,
@@ -145,4 +145,17 @@ export async function buildXml(m, knownAs, maxLen, msgsById) {
     (replyXml ? `\n${replyXml}` : "") +
     `</message>`
   );
+}
+
+export function getRandomWaveform(numPoints = 100) {
+  const bytes = new Uint8Array(numPoints);
+  let lastValue = 128;
+
+  for (let i = 0; i < numPoints; i++) {
+    const change = (Math.random() * 60) - 30; 
+    lastValue = Math.max(20, Math.min(255, lastValue + change));
+    bytes[i] = Math.round(lastValue);
+  }
+
+  return Buffer.from(bytes).toString('base64');
 }

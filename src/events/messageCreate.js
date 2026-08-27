@@ -101,7 +101,22 @@ export default {
           outputFormat: "opus_48000_192"
         });
         const buffer = Buffer.from(audio.audioBase64, "base64");
-        const replyMsg = await message.reply({ files: [{ attachment: buffer, name: "tts.opus" }] });
+        const replyMsg = await message.reply({
+          attachments: [
+            {
+              id: 0,
+              filename: "tts.opus",
+              waveform: Utils.getRandomWaveform(),
+              duration_secs: 10,
+            },
+          ],
+          files: [
+            {
+              attachment: buffer,
+              name: "tts.opus"
+            }
+          ] 
+        });
         await Utils.setTtsInDb(message.client.db, replyMsg.id, ttsText);
         return;
       }
