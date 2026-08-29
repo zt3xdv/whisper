@@ -93,7 +93,7 @@ export default {
           await member.roles.add(newRole);
           await client.db.set(`br_${guild.id}_${user.id}`, newRole.id);
         } else {
-          await role.edit({ name, colors: { primaryColor, secondaryColor } });
+          await role.edit({ name, colors: { primaryColor, secondaryColor: secondaryColor || undefined } });
         }
 
         await interaction.editReply(await getPayload());
