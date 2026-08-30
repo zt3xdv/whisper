@@ -100,7 +100,7 @@ export default {
         const submitted = await i.awaitModalSubmit({ time: 120000 });
         
         if (activeProcesses.has(user.id)) {
-          return submitted.reply({ content: "Another process is already running.", flags: MessageFlags.Ephemeral });
+          return submitted.reply({ content: `${emojis.exclamation} Please wait for the current action to finish.`, flags: MessageFlags.Ephemeral });
         }
 
         activeProcesses.add(user.id);
@@ -116,21 +116,22 @@ export default {
           await interaction.editReply(await getPayload(false));
           return submitted.reply({ content: `${emojis.exclamation} Invalid Hex color format`, flags: MessageFlags.Ephemeral });
         }
-
+        
+        const colors = { primaryColor, secondaryColor: secondaryColor || undefined };
         const currentRoleId = await client.db.get(`br_${guild.id}_${user.id}`);
         let currentRole = currentRoleId ? guild.roles.cache.get(currentRoleId) : null;
 
         if (!currentRole) {
           const newRole = await guild.roles.create({
             name,
-            color: primaryColor,
+            colors,
             position: guild.members.me.roles.highest.position - 1,
             reason: `Booster: ${user.tag}`
           });
           await member.roles.add(newRole);
           await client.db.set(`br_${guild.id}_${user.id}`, newRole.id);
         } else {
-          await currentRole.edit({ name, color: primaryColor });
+          await currentRole.edit({ name, colors });
         }
 
         await submitted.reply({ content: `${emojis.correct} Your booster role has been updated!`, flags: MessageFlags.Ephemeral });
