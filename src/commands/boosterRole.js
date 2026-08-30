@@ -90,7 +90,7 @@ export default {
         .setTitle('Booster Role Settings')
         .addComponents(
           new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('n').setLabel('Name').setValue(role?.name || "").setStyle(TextInputStyle.Short).setRequired(true)),
-          new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('pc').setLabel('Primary Color').setPlaceholder('#ffffff').setValue(role?.hexColor || "").setStyle(TextInputStyle.Short).setRequired(true)),
+          new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('pc').setLabel('Primary Color').setPlaceholder('#ffffff').setStyle(TextInputStyle.Short).setRequired(true)),
           new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('sc').setLabel('Secondary Color (optional)').setPlaceholder('#ffffff').setStyle(TextInputStyle.Short).setRequired(false))
         );
 
