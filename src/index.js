@@ -27,9 +27,6 @@ const client = new Client({
     Partials.Channel
   ]
 });
-client.rest = new REST({
-  version: APIVersion
-});
 client.commands = new Collection();
 client.events = {};
 client.db = new QuickDB({
@@ -54,7 +51,7 @@ for (const file of getFilesFromDir(path.join(import.meta.dirname, "events"))) {
 
 if (values.deploy) {
   const deployCommands = client.commands.map(c => ApplicationCommandManager.transformCommand(c)));
-  await rest.put(Routes.applicationCommands(config.clientId), { body: deployCommanda });
+  await client.rest.put(Routes.applicationCommands(config.clientId), { body: deployCommanda });
   
   if (!values.bot) {
     process.exit();
