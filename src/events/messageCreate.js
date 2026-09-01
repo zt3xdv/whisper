@@ -127,7 +127,7 @@ export default {
       
       const mentioned = message.mentions.has(message.client.user);
       const includesWhisper = message.content.toLowerCase().includes("whisper");
-      if (!mentioned && !includesWhisper) return;
+      if (!mentioned && !(message.channelId !== '1112023292333785120' && includesWhisper)) return;
 
       const channels = await Settings.get(message.client.db, "-", "whitelistedChannels");
       const roles = await Settings.get(message.client.db, "-", "whitelistedRoles");
