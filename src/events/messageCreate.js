@@ -119,6 +119,7 @@ async function fetchAiCompletion(systemPrompt, context, lastMessage) {
 }
 
 export default {
+  id: "messageCreate",
   name: Events.MessageCreate,
   async execute(message) {
     let interval;

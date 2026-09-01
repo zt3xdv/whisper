@@ -1,3 +1,5 @@
+import { RouteBases } from "discord.js";
+
 export function truncateByChars(s, max) {
   const str = (s ?? "").toString();
   return str.length > max ? str.slice(0, max) + "..." : str;
@@ -37,4 +39,11 @@ export function formatMentionsInContent(content, message) {
   });
 
   return out;
+}
+
+// Replace with something better later
+export async function getRestLatency() {
+  const start = Date.now(),
+        res = await fetch(RouteBases.api + "/gateway");
+  return { roundtrip: Date.now() - start, res };
 }

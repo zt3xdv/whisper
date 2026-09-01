@@ -156,6 +156,7 @@ async function sendText(chat_id, text) {
 }
 
 export default {
+  id: "telegram",
   name: Events.MessageCreate,
   async execute(message) {
     if (message.author?.bot) return; // ignore bots

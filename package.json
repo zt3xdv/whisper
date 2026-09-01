@@ -12,9 +12,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "npm run deploy; npm run bot",
-    "bot": "node src/index.js",
-    "deploy": "node src/deploy.js",
+    "start": "node src/index.js -d true -b true",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

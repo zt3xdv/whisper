@@ -1,11 +1,14 @@
 import { MessageFlags, ComponentType } from "discord.js";
 import { emojis } from "../utils/emojis.js";
+import { getRestLatency } from "../utils/utils.js";
 
 export default {
   name: "ping",
   description: "Pong!",
   
   async execute(interaction) {
+    const { roundtrip: rest } = await getRestLatency();
+    
     await interaction.reply({
       components: [
         {
@@ -13,7 +16,7 @@ export default {
           components: [
             {
               type: ComponentType.TextDisplay,
-              content: `${emojis.pings} **Pong!**\n-# Latency: ${interaction.client.ws.ping}ms`
+              content: `${emojis.pings} **Pong!**\n-# Websocket ${interaction.client.ws.ping}ms • Rest ${rest}ms`
             }
           ]
         }

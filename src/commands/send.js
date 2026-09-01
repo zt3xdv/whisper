@@ -18,25 +18,9 @@ export default {
       required: false,
     },
   ],
+  staff: true,
 
   async execute(interaction) {
-    if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageMessages)) {
-      return await interaction.reply({
-        components: [
-          {
-            type: ComponentType.Container,
-            components: [
-              {
-                type: ComponentType.TextDisplay,
-                content: `${emojis.wrong} You do not have permission to use this command.`,
-              },
-            ],
-          },
-        ],
-        flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
-      });
-    }
-
     const urlOrFragment = interaction.options.getString("url", true)?.trim();
     const targetChannel = interaction.options.getChannel("channel");
 

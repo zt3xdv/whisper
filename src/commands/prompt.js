@@ -1,5 +1,4 @@
 import { MessageFlags, ComponentType, ApplicationCommandOptionType } from "discord.js";
-import { isStaff } from "../utils/staff.js";
 import { emojis } from "../utils/emojis.js";
 
 export default {
@@ -13,25 +12,9 @@ export default {
       required: false,
     },
   ],
+  staff: true,
 
   async execute(interaction) {
-    if (!interaction.guild || !isStaff(interaction.member)) {
-      return await interaction.reply({
-        components: [
-          {
-            type: ComponentType.Container,
-            components: [
-              {
-                type: ComponentType.TextDisplay,
-                content: `${emojis.wrong} You do not have permission to use this command.`
-              }
-            ]
-          }
-        ],
-        flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral
-      });
-    }
-
     const prompt = interaction.options.getString("prompt");
 
     try {

@@ -2,6 +2,7 @@ import { Events } from "discord.js";
 import { isStaff } from "../utils/staff.js";
 
 export default {
+  id: "guildMemberUpdate",
   name: Events.GuildMemberUpdate,
   async execute(oldMember, newMember) {
     if (oldMember.premiumSince && !newMember.premiumSince && !isStaff(newMember)) {

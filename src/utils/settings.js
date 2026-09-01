@@ -30,9 +30,9 @@ export class Settings {
       key: "maxContextMessages",
       type: "number",
       min: 5,
-      max: 40,
-      global: true,
+      max: 70,
       defaultValue: 30,
+      global: true,
       required: true,
       name: "Max Context Messages",
       description: "How much messages can Whisper read since last message"
@@ -42,8 +42,8 @@ export class Settings {
       type: "number",
       min: 100,
       max: 600,
-      global: true,
       defaultValue: 500,
+      global: true,
       required: true,
       name: "Max Message Length",
       description: "Max length of the messages that Whisper will read"

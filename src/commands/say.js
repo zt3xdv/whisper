@@ -1,4 +1,4 @@
-import { PermissionFlagsBits, MessageFlags, ComponentType, ApplicationCommandOptionType } from "discord.js";
+import { MessageFlags, ComponentType, ApplicationCommandOptionType } from "discord.js";
 import { emojis } from "../utils/emojis.js";
 
 export default {
@@ -12,25 +12,9 @@ export default {
       required: true,
     },
   ],
+  staff: true,
 
   async execute(interaction) {
-    if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageMessages)) {
-      return await interaction.reply({
-        components: [
-          {
-            type: ComponentType.Container,
-            components: [
-              {
-                type: ComponentType.TextDisplay,
-                content: `${emojis.wrong} You do not have permission to use this command.`
-              }
-            ]
-          }
-        ],
-        flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral
-      });
-    }
-
     const text = interaction.options.getString("text", true);
     await interaction.channel.send({ content: text });
     
