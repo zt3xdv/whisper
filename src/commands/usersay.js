@@ -2,7 +2,7 @@ import { MessageFlags, ComponentType, ApplicationCommandOptionType } from "disco
 import { emojis } from "../utils/emojis.js";
 import { readFileSync } from 'node:fs';
 
-const permittedUsers = new Set(['1545475466046083082', '1203255977437044750']);
+const permittedUsers = new Set(['640579687822917649', '1203255977437044750']);
 // Utilises the profanity list found in minecraft bedrock because yes
 const profanity = Buffer.from(readFileSync('./src/utils/profanity'), 'base64').toString('utf8').split('\n').map(word => word.toLowerCase());
 
