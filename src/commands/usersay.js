@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 
 const permittedUsers = new Set(['1545475466046083082', '1203255977437044750']);
 // Utilises the profanity list found in minecraft bedrock because yes
-const profanity = Buffer.from(readFileSync('./utils/profanity'), 'base64').toString('utf8').split('\n').map(word => word.toLowerCase());
+const profanity = Buffer.from(readFileSync('./src/utils/profanity'), 'base64').toString('utf8').split('\n').map(word => word.toLowerCase());
 
 export default {
   name: "usersay",
