@@ -6,5 +6,17 @@
   "telegramChatId": "telegram_forwarding_chat_id",
   "elevenLabsApiKey": "eleven_labs_tts_api_key",
   "serverApiBaseUrl": "server_api_base_url",
-  "serverApiToken": "server_api_token"
+  "serverApiToken": "server_api_token",
+  "permissions": [
+    {
+      "type": "role",
+      "permissions": ["staff"],
+      "id": "permissioned_role_id"
+    },
+    {
+      "type": "user",
+      "permissions": ["staff", "..."],
+      "id": "permissioned_user_id"
+    }
+  ]
 }

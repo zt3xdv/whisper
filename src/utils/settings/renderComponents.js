@@ -1,12 +1,12 @@
 import { ComponentType, ButtonStyle, MessageFlags, SeparatorSpacingSize } from "discord.js";
 import { Settings } from "../settings.js";
-import { isStaff } from "../staff.js";
+import { checkPermission } from "../permissions.js";
 import { emojis } from "../emojis.js"
 
 export async function buildComponentsV2(client, user, currentPage, itemsPerPage) {
   const startIndex = currentPage * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, Settings.settingsDefinitions.length);
-  const userSettings = Settings.settingsDefinitions.filter(setting => !setting.global || isStaff(user));
+  const userSettings = Settings.settingsDefinitions.filter(setting => !setting.global || checkPermission(user, "staff"));
   const currentSettings = userSettings.slice(startIndex, endIndex);
   
   const container = {
@@ -57,6 +57,15 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
         max_values: 25,
         default_values: Array.isArray(value) ? value.map(id => ({ id, type: 'role' })) : []
       });
+    } else if (setting.type === "user") {
+      actionRow.components.push({
+        type: ComponentType.UserSelect,
+        custom_id: `select_${setting.key}`,
+        placeholder: "Select users...",
+        min_values: 0,
+        max_values: 25,
+        default_values: Array.isArray(value) ? value.map(id => ({ id, type: 'user' })) : []
+      });
     } else if (setting.type === "string" && Array.isArray(setting.enum)) {
       actionRow.components.push({
         type: ComponentType.StringSelect,
@@ -103,7 +112,7 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
     
     container.components.push({
       type: ComponentType.TextDisplay,
-      content: `-# Page **${currentPage + 1}** of **${Math.ceil(userSettings.length / itemsPerPage)}**${isStaff(user) ? " • including staff global options" : ""}`
+      content: `-# Page **${currentPage + 1}** of **${Math.ceil(userSettings.length / itemsPerPage)}**${checkPermission(user, "staff") ? " • including staff global options" : ""}`
     });
 
     container.components.push({

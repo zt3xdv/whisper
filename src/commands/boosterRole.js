@@ -1,6 +1,6 @@
 import { MessageFlags, ComponentType, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, ButtonStyle } from "discord.js";
 import { emojis } from "../utils/emojis.js";
-import { isStaff } from "../utils/staff.js";
+import { checkPermission } from "../utils/permissions.js";
 
 const activeProcesses = new Set();
 
@@ -11,7 +11,7 @@ export default {
   async execute(interaction) {
     const { member, guild, client, user } = interaction;
 
-    if (!member.premiumSince && !isStaff(member)) {
+    if (!member.premiumSince && !checkPermission(member, "staff")) {
       return interaction.reply({ 
         content: `${emojis.exclamation} Server Boost required`, 
         flags: MessageFlags.Ephemeral 
@@ -58,7 +58,7 @@ export default {
     };
 
     const response = await interaction.reply(await getPayload());
-    const collector = response.createMessageComponentCollector({ time: 60000 });
+    const collector = response.createMessageComponentCollector({ time: 120000 });
 
     collector.on("collect", async (i) => {
       if (i.user.id !== user.id) return;
@@ -89,9 +89,37 @@ export default {
         .setCustomId(`m_br_${Date.now()}`)
         .setTitle('Booster Role Settings')
         .addComponents(
-          new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('n').setLabel('Name').setValue(role?.name || "").setStyle(TextInputStyle.Short).setRequired(true)),
-          new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('pc').setLabel('Primary Color').setPlaceholder('#ffffff').setStyle(TextInputStyle.Short).setRequired(true)),
-          new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('sc').setLabel('Secondary Color (optional)').setPlaceholder('#ffffff').setStyle(TextInputStyle.Short).setRequired(false))
+          new ActionRowBuilder()
+            .addComponents(
+              new TextInputBuilder()
+                .setCustomId('n')
+                .setLabel('Name')
+                .setValue(role?.name || "")
+                .setStyle(TextInputStyle.Short)
+                // Update later with actual role name max length
+                .setMaxLength(32)
+                .setRequired(true)
+            ),
+          new ActionRowBuilder()
+            .addComponents(
+              new TextInputBuilder()
+                .setCustomId('pc')
+                .setLabel('Primary Color')
+                .setPlaceholder('#ffffff')
+                .setValue(role?.colors?.primaryColor || "")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true)
+            ),
+          new ActionRowBuilder()
+            .addComponents(
+              new TextInputBuilder()
+                .setCustomId('sc')
+                .setLabel('Secondary Color (optional)')
+                .setPlaceholder('#ffffff')
+                .setValue(role?.colors?.secondaryColor || "")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(false)
+            )
         );
 
       await i.showModal(modal);
@@ -114,7 +142,7 @@ export default {
         if (!colorRegex.test(primaryColor) || (secondaryColor && !colorRegex.test(secondaryColor))) {
           activeProcesses.delete(user.id);
           await interaction.editReply(await getPayload(false));
-          return submitted.reply({ content: `${emojis.exclamation} Invalid Hex color format`, flags: MessageFlags.Ephemeral });
+          return submitted.reply({ content: `${emojis.exclamation} Invalid Hex color format, Check your inputs`, flags: MessageFlags.Ephemeral });
         }
         
         const colors = { primaryColor, secondaryColor: secondaryColor || undefined };

@@ -1,5 +1,4 @@
 import { MessageFlags, ComponentType, ChannelType, PermissionsBitField, ApplicationCommandOptionType } from "discord.js";
-import { isStaff } from "../utils/staff.js";
 import { emojis } from "../utils/emojis.js";
 
 export default {
@@ -13,17 +12,9 @@ export default {
       required: false
     }
   ],
+  permissions: ["staff"],
   
   async execute(interaction) {
-    if (!interaction.guild || !isStaff(interaction.member)) {
-      return interaction.reply({
-        components: [{
-          type: ComponentType.Container, components:
-            [{ type: ComponentType.TextDisplay, content: `${emojis.wrong} You do not have permission to use this command.` }],
-        }], flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
-      });
-    }
-
     const channel = interaction.options.getChannel('channel') ?? interaction.channel;
 
     if (!channel.permissionsFor(interaction.client.user.id).has(PermissionsBitField.Flags.ManageRoles) ||

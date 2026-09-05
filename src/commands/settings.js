@@ -1,24 +1,23 @@
-import { ComponentType } from "discord.js";
+import { ComponentType, MessageFlags } from "discord.js";
 import { Settings } from "../utils/settings.js";
 import { buildComponentsV2 } from "../utils/settings/renderComponents.js";
 import { createEditModal } from "../utils/settings/modal.js";
+import { emojis } from "../utils/emojis.js";
 
 export default {
   name: "settings",
   description: "Manage your settings",
 
   async execute(interaction) {
-    await interaction.deferReply({});
-
-    const client = interaction.client;
-    const user = interaction.member ?? interaction.user;
+    await interaction.deferReply();
     
+    const user = interaction.member ?? interaction.user;
     const itemsPerPage = 3;
     let currentPage = 0;
-    
     let lastReply;
+    
     const updateMessage = async () => {
-      const payload = await buildComponentsV2(client, user, currentPage, itemsPerPage);
+      const payload = await buildComponentsV2(interaction.client, user, currentPage, itemsPerPage);
       lastReply = await interaction.editReply(payload);
     };
 
@@ -48,7 +47,7 @@ export default {
         const setting = Settings.settingsDefinitions.find(s => s.key === settingKey);
         if (!setting) return;
 
-        await Settings.put(client.db, user.id, setting.key, newValue);
+        await Settings.put(interaction.client.db, user.id, setting.key, newValue);
         await updateMessage();
       } catch (err) {}
     });
@@ -83,9 +82,9 @@ export default {
           const setting = Settings.settingsDefinitions.find(s => s.key === settingKey);
           if (!setting) return;
 
-          const currentValue = await Settings.get(client.db, user.id, setting.key);
+          const currentValue = await Settings.get(interaction.client.db, user.id, setting.key);
           const newValue = !Boolean(currentValue);
-          await Settings.put(client.db, user.id, setting.key, newValue);
+          await Settings.put(interaction.client.db, user.id, setting.key, newValue);
           await updateMessage();
           return;
         }
@@ -95,10 +94,10 @@ export default {
           const setting = Settings.settingsDefinitions.find(s => s.key === settingKey);
           if (!setting) return;
 
-          const currentValue = await Settings.get(client.db, user.id, setting.key);
+          const currentValue = await Settings.get(interaction.client.db, user.id, setting.key);
           await btnInt.reply({
             content: `-# **${setting.name ?? setting.key}**\n\`\`\`${JSON.stringify(currentValue, null, 2)}\`\`\``,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
           });
           return;
         }
@@ -108,12 +107,13 @@ export default {
           const setting = Settings.settingsDefinitions.find(s => s.key === settingKey);
           if (!setting) return;
 
-          const currentValue = await Settings.get(client.db, user.id, setting.key);
+          const currentValue = await Settings.get(interaction.client.db, user.id, setting.key);
           const modalCustomId = `modal_edit_${settingKey}`;
           const modal = createEditModal(modalCustomId, setting, currentValue);
 
           if (!modal || !modal.components?.length) {
-            await btnInt.reply({ content: "This setting cannot be edited with a modal.", ephemeral: true });
+            // Never going to happen but ig
+            await btnInt.reply({ content: `${emojis.exclamation} This setting cannot be edited with a modal.\n-# This is likely a bug, report it to us!`, flags: MessageFlags.Ephemeral });
             return;
           }
 
@@ -133,7 +133,7 @@ export default {
               if (isNaN(rawValue)) return;
             }
 
-            await Settings.put(client.db, user.id, setting.key, rawValue);
+            await Settings.put(interaction.client.db, user.id, setting.key, rawValue);
             await updateMessage();
           } catch (err) {}
           return;

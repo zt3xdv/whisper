@@ -1,29 +1,12 @@
 import { MessageFlags, ComponentType, ChannelType, PermissionsBitField } from "discord.js";
-import { isStaff } from "../utils/staff.js";
 import { emojis } from "../utils/emojis.js";
 
 export default {
   name: "lockdown",
   description: "Locks all public channels",
+  permissions: ["staff"],
   
   async execute(interaction) {
-    if (!interaction.guild || !isStaff(interaction.member)) {
-      return interaction.reply({
-        components: [
-          {
-            type: ComponentType.Container,
-            components: [
-              {
-                type: ComponentType.TextDisplay,
-                content: `${emojis.wrong} You do not have permission to use this command.`,
-              },
-            ],
-          },
-        ],
-        flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
-      });
-    }
-
     // Filter channels to only the ones wanted
     const channels = interaction.guild.channels.cache.filter(channel =>
       channel.permissionsFor(interaction.client.user.id).has(PermissionsBitField.Flags.ManageRoles) &&
