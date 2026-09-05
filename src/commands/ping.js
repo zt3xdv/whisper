@@ -16,7 +16,7 @@ export default {
           components: [
             {
               type: ComponentType.TextDisplay,
-              content: `${emojis.pings} **Pong!**\n-# Websocket ${interaction.client.ws.ping}ms • Rest ${rest}ms`
+              content: `${emojis.pings} **Pong!**\n-# Websocket **${interaction.client.ws.ping}ms** • Rest **${rest}ms**`
             }
           ]
         }
