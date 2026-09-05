@@ -52,6 +52,7 @@ export default {
       const auth = interaction.options.getString('authorization') ?? null;
       const maxTokens = interaction.options.getInteger('maxtokens');
 
+      // client.events.eventId is the event default export
       interaction.client.events.messageCreate.setEphemeralAiProvider(url, auth, model, maxTokens);
       interaction.reply({
         content: `${emojis.correct} Changed AI provider. This will reset on restart or failed response`,

@@ -53,7 +53,6 @@ export default {
   },
 
   async fetchAiCompletion(systemPrompt, context, lastMessage) {
-    if (this.ephemeralAiProvider.url) this.resetEphemeralAiProvider();
     const requestBody = {
       model: this.ephemeralAiProvider.model,
       messages: [
@@ -105,26 +104,27 @@ export default {
   async execute(message) {
     let interval;
     try {
-      if (message.author.bot && !allowedUsers.has(message.author.id)) return;
-      
       const mentioned = message.mentions.has(message.client.user);
       const includesWhisper = message.content.toLowerCase().includes("whisper");
       if (!mentioned && !includesWhisper) return;
-
-      const channels = await Settings.get(message.client.db, "-", "whitelistedChannels");
-      const roles = await Settings.get(message.client.db, "-", "whitelistedRoles");
+      
+      const users = await Settings.get(message.client.db, null, "whitelistedUsers");
+      if (message.author.bot && !users.includes(message.author.id)) return;
+      
+      const channels = await Settings.get(message.client.db, null, "whitelistedChannels");
+      const roles = await Settings.get(message.client.db, null, "whitelistedRoles");
       if (!channels.includes(message.channel.id)) return;
 
       const member = message.guild?.members?.cache?.get(message.author.id) ||
         (await message.guild?.members?.fetch(message.author.id).catch(() => null));
       const allowed = !!member?.roles?.cache?.some(r => roles.includes(r.id));
-      if (!allowed && !allowedUsers.has(message.author.id)) return;
+      if (!allowed) return;
 
       message.channel.sendTyping().catch(() => {});
       interval = setInterval(() => message.channel.sendTyping().catch(() => {}), 3500);
 
-      const maxCtx = await Settings.get(message.client.db, "-", "maxContextMessages");
-      const maxLen = await Settings.get(message.client.db, "-", "maxMessageLength");
+      const maxCtx = await Settings.get(message.client.db, null, "maxContextMessages");
+      const maxLen = await Settings.get(message.client.db, null, "maxMessageLength");
 
       const fetched = await message.channel.messages.fetch({ limit: maxCtx });
       const msgs = [...fetched.values()].sort((a, b) => a.createdTimestamp - b.createdTimestamp);

@@ -19,6 +19,14 @@ export class Settings {
       description: "Roles that can use Whisper AI"
     },
     {
+      key: "whitelistedUsers",
+      type: "role",
+      global: true,
+      defaultValue: [],
+      name: "Whitelisted Users",
+      description: "Users that can use Whisper AI"
+    },
+    {
       key: "whitelistedChannels",
       type: "channel",
       global: true,
@@ -101,8 +109,10 @@ export class Settings {
       case "bool":
         if (typeof value !== "boolean") return false
         break
+      case "array":
       case "channel":
       case "role":
+      case "user":
         if (!Array.isArray(value)) return false
         break
       case "number":
@@ -121,9 +131,6 @@ export class Settings {
       case "object":
         if (typeof value !== "object" || value === null || Array.isArray(value))
           return false
-        break
-      case "array":
-        if (!Array.isArray(value)) return false
         break
     }
     return true

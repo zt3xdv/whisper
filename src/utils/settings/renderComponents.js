@@ -57,6 +57,15 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
         max_values: 25,
         default_values: Array.isArray(value) ? value.map(id => ({ id, type: 'role' })) : []
       });
+    } else if (setting.type === "user") {
+      actionRow.components.push({
+        type: ComponentType.UserSelect,
+        custom_id: `select_${setting.key}`,
+        placeholder: "Select users...",
+        min_values: 0,
+        max_values: 25,
+        default_values: Array.isArray(value) ? value.map(id => ({ id, type: 'user' })) : []
+      });
     } else if (setting.type === "string" && Array.isArray(setting.enum)) {
       actionRow.components.push({
         type: ComponentType.StringSelect,
