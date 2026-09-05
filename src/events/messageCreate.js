@@ -4,7 +4,6 @@ import { Settings } from "../utils/settings.js";
 import { truncateByChars, escapeXml, formatMentionsInContent } from "../utils/utils.js";
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 
-const allowedUsers = new Set(["1489362526880796903"]);
 const ttsCache = new Map();
 
 function getTts(id) {
