@@ -20,7 +20,7 @@ export class Settings {
     },
     {
       key: "whitelistedUsers",
-      type: "role",
+      type: "user",
       global: true,
       defaultValue: [],
       name: "Whitelisted Users",
