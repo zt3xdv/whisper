@@ -1,6 +1,7 @@
 import { MessageFlags, ComponentType } from "discord.js";
 import { Events } from "discord.js";
 import { emojis } from "../utils/emojis.js";
+import { checkPermission } from "../utils/permissions.js";
 
 export default {
   id: "interactionCreate",
@@ -12,22 +13,29 @@ export default {
     if (!command) return;
     
     try {
-      if (command.staff && !isStaff(interaction.member)) {
-        return await interaction.reply({
-          components: [
-            {
-              type: ComponentType.Container,
-              components: [
-                {
-                  type: ComponentType.TextDisplay,
-                  content: `${emojis.exclamation} This command is staff only, you cannot run it`
-                }
-              ]
-            }
-          ],
-          flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral
-        });
+      if (command.permissions) {
+        const hasPermission = command.permissions.some(permission => 
+          checkPermission(interaction.member, permission)
+        );
+
+        if (!hasPermission) {
+          return await interaction.reply({
+            components: [
+              {
+                type: ComponentType.Container,
+                components: [
+                  {
+                    type: ComponentType.TextDisplay,
+                    content: `${emojis.exclamation} You don't have permission to run this command`
+                  }
+                ]
+              }
+            ],
+            flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral
+          });
+        }
       }
+
       await command.execute(interaction);
     } catch (e) {
       console.error(e);

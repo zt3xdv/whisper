@@ -12,7 +12,7 @@ export default {
       required: false
     }
   ],
-  staff: true,
+  permissions: ["staff"],
 
   async execute(interaction) {
     const channel = interaction.options.getChannel('channel') ?? interaction.channel;

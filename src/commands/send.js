@@ -18,7 +18,7 @@ export default {
       required: false,
     },
   ],
-  staff: true,
+  permissions: ["staff"],
 
   async execute(interaction) {
     const urlOrFragment = interaction.options.getString("url", true)?.trim();

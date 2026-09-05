@@ -42,7 +42,7 @@ export default {
       type: ApplicationCommandOptionType.Subcommand,
     }
   ],
-  staff: true,
+  permissions: ["staff"],
   
   async execute(interaction) {
     const subcommand = interaction.options.getSubcommand();

@@ -1,22 +1,14 @@
-import { APIVersion, REST, Routes, ApplicationCommandManager, Client, GatewayIntentBits, Partials, Collection } from "discord.js";
-import { getFilesFromDir } from "./utils/file.js";
+import { Routes, ApplicationCommandManager, Client, GatewayIntentBits, Partials, Collection } from "discord.js";
+import { getFilesFromDir, getArgs } from "./utils/utils.js";
 import { JSONDriver } from "quick.db/out/drivers/JSONDriver.js";
 import { QuickDB } from "quick.db";
 import config from "../config.json" with { type: "json" };
 import path from "node:path";
-import { parseArgs } from "node:util";
 
 process.on("unexpectedException", console.error);
 process.on("unhandledRejection", console.error);
 
-const { values, _ } = parseArgs({
-  options: {
-    deploy: { type: 'string', short: 'd' },
-    bot: { type: 'string', short: 'b' }
-  },
-  allowPositionals: true
-});
-
+const args = getArgs();
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -32,6 +24,7 @@ client.events = {};
 client.db = new QuickDB({
   driver: new JSONDriver(path.join(import.meta.dirname, "..", "database.qdb"))
 });
+client.rest.setToken(config.token); // As client only sets token after login
 
 for (const file of getFilesFromDir(path.join(import.meta.dirname, "commands"))) {
   const { default: command } = await import(`file://${file}`);
@@ -49,12 +42,12 @@ for (const file of getFilesFromDir(path.join(import.meta.dirname, "events"))) {
   }
 }
 
-if (values.deploy) {
-  const deployCommands = client.commands.map(c => ApplicationCommandManager.transformCommand(c)));
-  await client.rest.put(Routes.applicationCommands(config.clientId), { body: deployCommanda });
+if (args.deploy) {
+  const res = await client.rest.put(Routes.applicationCommands(config.clientId), {
+    body: client.commands.map(c => ApplicationCommandManager.transformCommand(c))
+  });
   
-  if (!values.bot) {
-    process.exit();
-  }
+  console.log("Registered " + res.length + " commands");
 }
+
 client.login(config.token);

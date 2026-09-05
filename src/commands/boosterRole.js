@@ -1,6 +1,6 @@
 import { MessageFlags, ComponentType, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, ButtonStyle } from "discord.js";
 import { emojis } from "../utils/emojis.js";
-import { isStaff } from "../utils/staff.js";
+import { checkPermission } from "../utils/permissions.js";
 
 const activeProcesses = new Set();
 
@@ -11,7 +11,7 @@ export default {
   async execute(interaction) {
     const { member, guild, client, user } = interaction;
 
-    if (!member.premiumSince && !isStaff(member)) {
+    if (!member.premiumSince && !checkPermission(member, "staff")) {
       return interaction.reply({ 
         content: `${emojis.exclamation} Server Boost required`, 
         flags: MessageFlags.Ephemeral 

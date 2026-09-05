@@ -4,7 +4,7 @@ import { emojis } from "../utils/emojis.js";
 export default {
   name: "lockdown",
   description: "Locks all public channels",
-  staff: true,
+  permissions: ["staff"],
   
   async execute(interaction) {
     // Filter channels to only the ones wanted

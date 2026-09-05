@@ -12,7 +12,7 @@ export default {
       required: true,
     },
   ],
-  staff: true,
+  permissions: ["staff"],
 
   async execute(interaction) {
     const text = interaction.options.getString("text", true);

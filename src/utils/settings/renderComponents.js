@@ -1,12 +1,12 @@
 import { ComponentType, ButtonStyle, MessageFlags, SeparatorSpacingSize } from "discord.js";
 import { Settings } from "../settings.js";
-import { isStaff } from "../staff.js";
+import { checkPermission } from "../permissions.js";
 import { emojis } from "../emojis.js"
 
 export async function buildComponentsV2(client, user, currentPage, itemsPerPage) {
   const startIndex = currentPage * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, Settings.settingsDefinitions.length);
-  const userSettings = Settings.settingsDefinitions.filter(setting => !setting.global || isStaff(user));
+  const userSettings = Settings.settingsDefinitions.filter(setting => !setting.global || checkPermission(user, "staff"));
   const currentSettings = userSettings.slice(startIndex, endIndex);
   
   const container = {
@@ -103,7 +103,7 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
     
     container.components.push({
       type: ComponentType.TextDisplay,
-      content: `-# Page **${currentPage + 1}** of **${Math.ceil(userSettings.length / itemsPerPage)}**${isStaff(user) ? " • including staff global options" : ""}`
+      content: `-# Page **${currentPage + 1}** of **${Math.ceil(userSettings.length / itemsPerPage)}**${checkPermission(user, "staff") ? " • including staff global options" : ""}`
     });
 
     container.components.push({

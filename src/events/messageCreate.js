@@ -1,11 +1,9 @@
 import { Events } from "discord.js";
 import config from "../../config.json" with { type: "json" };
-import { staffRoleIds } from "../utils/staff.js";
 import { Settings } from "../utils/settings.js";
 import { truncateByChars, escapeXml, formatMentionsInContent } from "../utils/utils.js";
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 
-// Big tool
 const allowedUsers = new Set(["1489362526880796903"]);
 const ttsCache = new Map();
 
@@ -22,105 +20,88 @@ function setTts(id, text) {
   }
 }
 
-// Ephemeral ai provider
-const ephemeralAiProvider = {
-  url: "",
-  authorization: "",
-  model: "",
-  maxTokens: 512,
-  isCustom: false,
-};
-export function setEphemeralAiProvider(url, authorization, model, maxTokens) {
-  ephemeralAiProvider.url = url;
-  ephemeralAiProvider.authorization = authorization && authorization !== '' ? authorization : null;
-  ephemeralAiProvider.model = model;
-  ephemeralAiProvider.maxTokens = maxTokens ?? 512;
-  ephemeralAiProvider.isCustom = true;
-}
-export function resetEphemeralAiProvider() {
-  ephemeralAiProvider.url = 'https://integrate.api.nvidia.com/v1/chat/completions';
-  ephemeralAiProvider.authorization = config.nvidiaApiKey;
-  ephemeralAiProvider.model = 'deepseek-ai/deepseek-v4-flash-0731';
-  ephemeralAiProvider.maxTokens = 512;
-  ephemeralAiProvider.isCustom = false;
-}
-resetEphemeralAiProvider();
-async function fetchAiCompletion(systemPrompt, context, lastMessage) {
-  if (ephemeralAiProvider.isCustom) { // fallback stuff so that if custom url fails it goes back to default
-    try {
-      const response = await fetch(ephemeralAiProvider.url, {
-        method: "POST",
-        headers: {
-          Authorization: ephemeralAiProvider.authorization ? `Bearer ${ephemeralAiProvider.authorization}` : null,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: ephemeralAiProvider.model,
-          messages: [
-            { role: "system", content: systemPrompt || "" },
-            {
-              role: "user",
-              content:
-                `Chat history (context):\n${context}\n\n` +
-                `Latest message: ${lastMessage}\n\n` +
-                `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked, and yes, you can send voice messages), if asked to send a voice [...]`
-            }
-          ],
-          max_tokens: ephemeralAiProvider.maxTokens,
-          temperature: 0.6
-        }),
-        signal: AbortSignal.timeout(60_000),
-      });
-
-
-      if (!response.ok) {
-        console.warn('Failed to fetch from custom url, resetting back to default and reattempting');
-        resetEphemeralAiProvider();
-        return fetchAiCompletion(systemPrompt, context, lastMessage);
-      }
-
-      return response;
-    } catch (error) {
-      if (error.name === 'TimeoutError') {
-        console.warn('Custom url timed out, resetting back to default and reattempting');
-        resetEphemeralAiProvider();
-        return fetchAiCompletion(systemPrompt, context, lastMessage);
-      }
-      else {
-        throw error;
-      }
-    }
-
-  }
-  else {
-    return fetch(ephemeralAiProvider.url, {
-      method: "POST",
-      headers: {
-        Authorization: ephemeralAiProvider.authorization ? `Bearer ${ephemeralAiProvider.authorization}` : null,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: ephemeralAiProvider.model,
-        messages: [
-          { role: "system", content: systemPrompt || "" },
-          {
-            role: "user",
-            content:
-              `Chat history (context):\n${context}\n\n` +
-              `Latest message: ${lastMessage}\n\n` +
-              `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked, and yes, you can send voice messages), if asked to send a voice [...]`
-          }
-        ],
-        max_tokens: ephemeralAiProvider.maxTokens,
-        temperature: 0.6
-      }),
-    });
-  }
-}
-
 export default {
   id: "messageCreate",
   name: Events.MessageCreate,
+
+  defaultEphemeralConfig: {
+    url: 'https://integrate.api.nvidia.com/v1/chat/completions',
+    authorization: config.nvidiaApiKey,
+    model: 'deepseek-ai/deepseek-v4-flash-0731',
+    maxTokens: 512,
+  },
+
+  ephemeralAiProvider: {
+    url: 'https://integrate.api.nvidia.com/v1/chat/completions',
+    authorization: config.nvidiaApiKey,
+    model: 'deepseek-ai/deepseek-v4-flash-0731',
+    maxTokens: 512,
+  },
+
+  setEphemeralAiProvider(url, authorization, model, maxTokens) {
+    this.ephemeralAiProvider = {
+      url,
+      authorization: (authorization?.trim?.()) || null,
+      model,
+      maxTokens: maxTokens ?? 512,
+      isCustom: true
+    };
+  },
+
+  resetEphemeralAiProvider() {
+    this.ephemeralAiProvider = this.defaultEphemeralConfig;
+  },
+
+  async fetchAiCompletion(systemPrompt, context, lastMessage) {
+    if (this.ephemeralAiProvider.url) this.resetEphemeralAiProvider();
+    const requestBody = {
+      model: this.ephemeralAiProvider.model,
+      messages: [
+        { role: "system", content: systemPrompt || "" },
+        {
+          role: "user",
+          content:
+            `Chat history (context):\n${context}\n\n` +
+            `Latest message: ${lastMessage}\n\n` +
+            `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked, and yes, you can send voice messages), if asked to send a voice message always add %tts%.`
+        }
+      ],
+      max_tokens: this.ephemeralAiProvider.maxTokens,
+      temperature: 0.6
+    };
+
+    const fetchOptions = {
+      method: "POST",
+      headers: {
+        ...(this.ephemeralAiProvider.authorization && { Authorization: `Bearer ${this.ephemeralAiProvider.authorization}` }),
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(requestBody),
+      signal: AbortSignal.timeout(60_000),
+    };
+
+    if (!this.ephemeralAiProvider.isCustom) {
+      return fetch(this.ephemeralAiProvider.url, fetchOptions);
+    }
+
+    try {
+      const response = await fetch(this.ephemeralAiProvider.url, fetchOptions);
+
+      if (response.ok) return response;
+
+      console.warn('Failed to fetch from custom url, resetting back to default and reattempting');
+      this.resetEphemeralAiProvider();
+      return this.fetchAiCompletion(systemPrompt, context, lastMessage);
+    } catch (error) {
+      if (error.name === 'TimeoutError') {
+        console.warn('Custom url timed out, resetting back to default and reattempting');
+        this.resetEphemeralAiProvider();
+        return this.fetchAiCompletion(systemPrompt, context, lastMessage);
+      }
+      throw error;
+    }
+  },
+
   async execute(message) {
     let interval;
     try {
@@ -136,7 +117,7 @@ export default {
 
       const member = message.guild?.members?.cache?.get(message.author.id) ||
         (await message.guild?.members?.fetch(message.author.id).catch(() => null));
-      const allowed = !!member?.roles?.cache?.some(r => roles.includes(r.id) || staffRoleIds.has(r.id));
+      const allowed = !!member?.roles?.cache?.some(r => roles.includes(r.id));
       if (!allowed && !allowedUsers.has(message.author.id)) return;
 
       message.channel.sendTyping().catch(() => {});
@@ -156,7 +137,7 @@ export default {
         uniqueIds.forEach((id, i) => knownAs.set(id, aliases[i] ?? ""));
       }
 
-      async function buildXml(m) {
+      const buildXml = async (m) => {
         const author = m.author ?? {};
         const authorId = author.id ?? "";
         const alias = knownAs.get(authorId) ?? "";
@@ -219,7 +200,7 @@ export default {
           (replyXml ? `\n${replyXml}` : "") +
           `</message>`
         );
-      }
+      };
 
       const parts = [];
       for (const m of msgs) parts.push(await buildXml(m));
@@ -231,7 +212,7 @@ export default {
       const lastSource = lastCached ?? (last?.content ?? "");
       const lastContent = truncateByChars(formatMentionsInContent(lastSource, last), maxLen);
 
-      const response = await fetchAiCompletion(systemPrompt, contextXml, escapeXml(lastContent));
+      const response = await this.fetchAiCompletion(systemPrompt, contextXml, escapeXml(lastContent));
 
       if (!response.ok) {
         const text = await response.text().catch(() => "");
