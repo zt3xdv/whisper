@@ -18,7 +18,7 @@ export default {
   async execute(interaction) {
     const text = interaction.options.getString("text", true);
     await interaction.channel.send({ content: text });
-    await addAuditLog(client.db, interaction.guildId, interaction.author.toString(), `Used /say command with content: ${text}`);
+    await addAuditLog(interaction.client.db, interaction.guildId, interaction.author.toString(), `Used /say command with content: ${text}`);
     
     return await interaction.reply({
       components: [
