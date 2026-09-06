@@ -2,9 +2,11 @@ import { MessageFlags, ComponentType, ButtonStyle, SeparatorSpacingSize } from "
 import { emojis } from "../emojis.js";
 
 export function buildAuditLogComponents(currentPage, itemsPerPage, logs, totalPages) {
+  const sortedLogs = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  
   const startIndex = currentPage * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, logs.length);
-  const currentLogs = logs.slice(startIndex, endIndex);
+  const endIndex = Math.min(startIndex + itemsPerPage, sortedLogs.length);
+  const currentLogs = sortedLogs.slice(startIndex, endIndex);
   
   const container = {
     type: ComponentType.Container,
@@ -57,7 +59,7 @@ export function buildAuditLogComponents(currentPage, itemsPerPage, logs, totalPa
         custom_id: `auditlog_next_${currentPage}`,
         emoji: emojis.right,
         style: ButtonStyle.Secondary,
-        disabled: endIndex >= logs.length
+        disabled: endIndex >= sortedLogs.length
       }
     ]
   });

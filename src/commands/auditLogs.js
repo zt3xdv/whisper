@@ -10,7 +10,7 @@ export default {
   async execute(interaction) {
     const itemsPerPage = 5;
     
-    const logs = ((await interaction.client.db.get(`auditlogs_${interaction.guildId}`)) || []).reverse();
+    const logs = (await interaction.client.db.get(`auditlogs_${interaction.guildId}`)) || []
     const totalPages = Math.ceil(logs.length / itemsPerPage);
     
     if (logs.length === 0) {
