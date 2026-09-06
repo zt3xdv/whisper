@@ -29,13 +29,46 @@ export default {
         flags: MessageFlags.IsComponentsV2
       });
     }
-    
-    const components = buildAuditLogComponents(0, itemsPerPage, logs, totalPages);
-    
-    await interaction.reply({
-      components: components.components,
-      flags: MessageFlags.IsComponentsV2,
-      allowedMentions: { parse: [] }
+
+    let currentPage = 0;
+
+    const getPayload = () => {
+      return {
+        components: buildAuditLogComponents(currentPage, itemsPerPage, logs, totalPages),
+        flags: MessageFlags.IsComponentsV2,
+        allowedMentions: { parse: [] }
+      };
+    };
+
+    const response = await interaction.reply(await getPayload());
+    const collector = response.createMessageComponentCollector({ time: 120_000 });
+
+    collector.on("collect", async (i) => {
+      if (i.user.id !== interaction.user.id) return;
+
+      collector.resetTimer();
+
+      if (i.customId.startsWith("auditlog_prev")) {
+        if (currentPage > 0) currentPage--;
+      } else if (i.customId.startsWith("auditlog_next")) {
+        if (currentPage < totalPages - 1) currentPage++;
+      }
+
+      await i.update(await getPayload());
+    });
+
+    collector.on("end", async (collected, reason) => {
+      if (reason === "time") {
+        const disabledPayload = buildAuditLogComponents(currentPage, itemsPerPage, logs, totalPages);
+        disabledPayload[0].components[disabledPayload[0].components.length - 1].components.forEach(btn => {
+          btn.disabled = true;
+        });
+
+        await interaction.editReply({
+          components: disabledPayload,
+          flags: MessageFlags.IsComponentsV2
+        }).catch(() => {});
+      }
     });
   }
 };

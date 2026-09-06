@@ -65,7 +65,6 @@ export function buildAuditLogComponents(currentPage, itemsPerPage, logs, totalPa
   });
 
   return {
-    components: [container],
-    flags: MessageFlags.IsComponentsV2
+    components: [container]
   };
 }
