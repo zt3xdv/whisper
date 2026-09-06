@@ -66,7 +66,8 @@ export default {
 
         await interaction.editReply({
           components: disabledPayload,
-          flags: MessageFlags.IsComponentsV2
+          flags: MessageFlags.IsComponentsV2,
+          allowedMentions: { parse: [] }
         }).catch(() => {});
       }
     });
