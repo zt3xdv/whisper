@@ -172,6 +172,8 @@ export default {
 
     const executeWithRetry = async () => {
       try {
+        if (interval) clearInterval(interval);
+        
         const mentioned = message.mentions.has(message.client.user);
         const includesWhisper = message.content.toLowerCase().includes("whisper");
         if (!mentioned && !includesWhisper) return;
