@@ -69,3 +69,20 @@ export async function getRestLatency() {
         res = await fetch(RouteBases.api + "/gateway");
   return { roundtrip: Date.now() - start, res };
 }
+
+export async function addAuditLog(db, guildId, author, description) {
+  const maxLogs = 75;
+  let logs = (await db.get(`auditlogs_${guildId}`)) || [];
+  
+  logs.push({
+    author,
+    description,
+    timestamp: Date.now()
+  });
+
+  if (logs.length > maxLogs) {
+    logs = logs.slice(-maxLogs);
+  }
+  
+  await db.set(`auditlogs_${guildId}`, logs);
+}

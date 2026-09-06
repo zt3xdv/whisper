@@ -13,5 +13,6 @@ export const emojis = {
   "outage": "<:outage:1537913458513936448>",
   "clock": "<:clock:1537913931623039026>",
   "alarm": "<:alarm:1537914047675244574>",
-  "calendar": "<:calendar:1537914556901232670>"
+  "calendar": "<:calendar:1537914556901232670>",
+  "list": "<:list:1546227717869932584>"
 };
