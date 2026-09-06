@@ -64,7 +64,5 @@ export function buildAuditLogComponents(currentPage, itemsPerPage, logs, totalPa
     ]
   });
 
-  return {
-    components: [container]
-  };
+  return [container];
 }
