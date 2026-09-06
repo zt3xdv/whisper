@@ -188,7 +188,7 @@ export default {
         const member = message.guild?.members?.cache?.get(message.author.id) ||
           (await message.guild?.members?.fetch(message.author.id).catch(() => null));
         const allowed = !!member?.roles?.cache?.some(r => roles.includes(r.id));
-        if (!allowed) return;
+        if (!allowed && !users.includes(message.author.id)) return;
 
         message.channel.sendTyping().catch(() => {});
         interval = setInterval(() => message.channel.sendTyping().catch(() => {}), 3500);
