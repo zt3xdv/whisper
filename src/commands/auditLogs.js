@@ -15,8 +15,18 @@ export default {
     
     if (logs.length === 0) {
       return interaction.reply({
-        content: `${emojis.exclamation} No audit logs available`,
-        flags: MessageFlags.Ephemeral
+        components: [
+          {
+            type: ComponentType.Container,
+            components: [
+              {
+                type: ComponentType.TextDisplay,
+                content: `${emojis.exclamation} There are not any audit logs`
+              }
+            ]
+          }
+        ],
+        flags: MessageFlags.IsComponentsV2
       });
     }
     
@@ -24,7 +34,8 @@ export default {
     
     await interaction.reply({
       components: components.components,
-      flags: MessageFlags.IsComponentsV2
+      flags: MessageFlags.IsComponentsV2,
+      allowedMentions: { parse: [] }
     });
   }
 };
