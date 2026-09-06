@@ -108,7 +108,7 @@ export default {
           if (!setting) return;
 
           const currentValue = await Settings.get(interaction.client.db, user.id, setting.key);
-          const modalCustomId = `modal_edit_${settingKey}`;
+          const modalCustomId = `modal_edit_${settingKey}_${Date.now()}`;
           const modal = createEditModal(modalCustomId, setting, currentValue);
 
           if (!modal || !modal.components?.length) {

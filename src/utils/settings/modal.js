@@ -2,7 +2,7 @@ import { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } from
 
 export function createEditModal(modalCustomId, setting, currentValue) {
   const modal = new ModalBuilder()
-    .setCustomId(modalCustomId + "_" + Date.now())
+    .setCustomId(modalCustomId)
     .setTitle(`Edit ${setting.name}`.slice(0, 45));
 
   const components = [];
