@@ -1,7 +1,7 @@
 import { Events } from "discord.js";
 import config from "../../config.json" with { type: "json" };
 import { Settings } from "../utils/settings.js";
-import { truncateByChars, escapeXml, formatMentionsInContent } from "../utils/utils.js";
+import { truncateByChars, formatMentionsInContent } from "../utils/utils.js";
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 
 const ttsCache = new Map();
@@ -62,6 +62,7 @@ export default {
           content:
             `Chat history (context):\n${context}\n\n` +
             `Latest message: ${lastMessage}\n\n` +
+            `Messages are compact JSON: id=author ID, u=username, n=display name, t=ISO 8601 timestamp, x=message content, r=referenced message; r uses the same fields. Fields may be missing; r=null means no reply. Use x as the current message and r.x as quoted context.\n` +
             `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked, and yes, you can send voice messages), if asked to send a voice message always add %tts%.`
         }
       ],
@@ -101,24 +102,42 @@ export default {
     }
   },
 
-  async buildXml(m, msgsById, knownAs, maxLen, client) {
-    const author = m.author ?? {};
-    const authorId = author.id ?? "";
-    const alias = knownAs.get(authorId) ?? "";
-    const displayName = m.client?.user && authorId === m.client.user.id
-      ? m.client.user.username
-      : (alias && alias !== "none" ? alias : (m.member?.displayName || author.username || ""));
-    const cached = (m.client?.user && authorId === m.client.user.id) ? getTts(m.id) : null;
-    const raw = cached ?? (m.content ?? "");
-    const text = truncateByChars(formatMentionsInContent(raw, m), maxLen);
-    const time = m.createdTimestamp ? new Date(m.createdTimestamp).toISOString() : "";
-    const username = author.username ?? "";
-    const avatar = author.displayAvatarURL ? author.displayAvatarURL({ dynamic: true }) : "";
+  async buildMessage(m, msgsById, knownAs, maxLen) {
+    const getData = (msg, useAlias = true) => {
+      const author = msg.author ?? {};
+      const id = author.id ?? "";
+      const isOwn = msg.client?.user && id === msg.client.user.id;
+      const alias = useAlias ? knownAs.get(id) : "";
 
-    let replyXml = "";
+      const name = isOwn
+        ? msg.client.user.username
+        : alias && alias !== "none"
+          ? alias
+          : msg.member?.displayName || author.username || "";
+
+      const cached = isOwn ? getTts(msg.id) : null;
+      const text = truncateByChars(
+        formatMentionsInContent(cached ?? msg.content ?? "", msg),
+        maxLen
+      );
+
+      return {
+        id,
+        ...(author.username ? { u: author.username } : {}),
+        ...(name ? { n: name } : {}),
+        ...(msg.createdTimestamp
+          ? { t: new Date(msg.createdTimestamp).toISOString() }
+          : {}),
+        ...(text ? { x: text } : {})
+      };
+    };
+
+    const result = getData(m);
     const refId = m.reference?.messageId ?? m.referencedMessage?.id;
+
     if (refId) {
       let ref = msgsById.get(refId);
+
       if (!ref) {
         try {
           ref = await m.channel.messages.fetch(refId);
@@ -126,44 +145,11 @@ export default {
           ref = null;
         }
       }
-      if (ref) {
-        const rAuth = ref.author ?? {};
-        const rId = rAuth.id ?? "";
-        const rCached = (ref.client?.user && rId === ref.client.user.id) ? getTts(ref.id) : null;
-        const rRaw = rCached ?? (ref.content ?? "");
-        const rText = truncateByChars(formatMentionsInContent(rRaw, ref), maxLen);
-        const rTime = ref.createdTimestamp ? new Date(ref.createdTimestamp).toISOString() : "";
-        const rUser = rAuth.username ?? "";
-        const rAvatar = rAuth.displayAvatarURL ? rAuth.displayAvatarURL({ dynamic: true }) : "";
 
-        replyXml =
-          `  <replyTo>\n` +
-          `    <authorId>${escapeXml(rId)}</authorId>\n` +
-          `    <username>${escapeXml(rUser)}</username>\n` +
-          `    <displayName>${escapeXml(ref.member?.displayName || rUser)}</displayName>\n` +
-          `    <avatarUrl>${escapeXml(rAvatar)}</avatarUrl>\n` +
-          `    <time>${rTime}</time>\n` +
-          `    <text>${escapeXml(rText)}</text>\n` +
-          `  </replyTo>\n`;
-      } else {
-        replyXml =
-          `  <replyTo>\n` +
-          `    <missing>true</missing>\n` +
-          `  </replyTo>\n`;
-      }
+      result.r = ref ? getData(ref, false) : null;
     }
 
-    return (
-      `<message>\n` +
-      `  <authorId>${escapeXml(authorId)}</authorId>\n` +
-      `  <username>${escapeXml(username)}</username>\n` +
-      `  <displayName>${escapeXml(displayName)}</displayName>\n` +
-      `  <avatarUrl>${escapeXml(avatar)}</avatarUrl>\n` +
-      `  <time>${time}</time>\n` +
-      `  <text>${escapeXml(text)}</text>\n` +
-      (replyXml ? `\n${replyXml}` : "") +
-      `</message>`
-    );
+    return JSON.stringify(result);
   },
 
   async execute(message) {
@@ -209,9 +195,9 @@ export default {
 
         const parts = [];
         for (const m of msgs) {
-          parts.push(await this.buildXml(m, msgsById, knownAs, maxLen, message.client));
+          parts.push(await this.buildMessage(m, msgsById, knownAs, maxLen, message.client));
         }
-        const contextXml = parts.join("\n");
+        const context = parts.join("\n");
 
         const systemPrompt = await message.client.db.get("systemPrompt");
         const last = msgs[msgs.length - 1];
@@ -219,7 +205,7 @@ export default {
         const lastSource = lastCached ?? (last?.content ?? "");
         const lastContent = truncateByChars(formatMentionsInContent(lastSource, last), maxLen);
 
-        const response = await this.fetchAiCompletion(systemPrompt, contextXml, escapeXml(lastContent));
+        const response = await this.fetchAiCompletion(systemPrompt, context, lastContent);
 
         if (!response.ok) {
           const text = await response.text().catch(() => "");
