@@ -24,6 +24,73 @@ export default {
   id: "messageCreate",
   name: Events.MessageCreate,
 
+  actions: [
+    {
+      name: "react",
+
+      async execute({ channel, meta }) {
+        const { messageId, emoji } = meta ?? {};
+
+        if (!messageId || !emoji) {
+          throw new Error("Action react requires meta.messageId and meta.emoji.");
+        }
+
+        const targetMessage = await channel.messages.fetch(messageId);
+        await targetMessage.react(emoji);
+      }
+    }
+  ],
+
+  extractActions(answer) {
+    const actions = [];
+    const textLines = [];
+
+    for (const line of answer.split("\n")) {
+      const trimmed = line.trim();
+
+      if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+        try {
+          const parsed = JSON.parse(trimmed);
+
+          if (parsed?.action) {
+            actions.push(parsed);
+            continue;
+          }
+        } catch { /* invalid json thing */ }
+      }
+
+      textLines.push(line);
+    }
+
+    return {
+      text: textLines.join("\n").trim(),
+      actions
+    };
+  },
+
+  async executeActions(actions, message) {
+    for (const actionCall of actions) {
+      const action = this.actions.find(
+        item => item.name === actionCall?.action
+      );
+
+      if (!action) {
+        continue;
+      }
+
+      try {
+        await action.execute({
+          client: message.client,
+          channel: message.channel,
+          message,
+          meta: actionCall.meta ?? {}
+        });
+      } catch (error) {
+        console.error(`Error executing action "${actionCall.action}":`, error);
+      }
+    }
+  },
+
   defaultEphemeralConfig: {
     url: config.ai.url,
     authorization: config.ai.token,
@@ -62,8 +129,12 @@ export default {
           content:
             `Chat history (context):\n${context}\n\n` +
             `Latest message: ${lastMessage}\n\n` +
-            `Messages are compact JSON: id=author ID, u=username, n=display name, t=ISO 8601 timestamp, x=message content, r=referenced message; r uses the same fields. Fields may be missing; r=null means no reply. Use x as the current message and r.x as quoted context.\n` +
-            `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked, and yes, you can send voice messages), if asked to send a voice message always add %tts%.`
+            `Messages are compact JSON: id=author ID, u=username, n=display name, t=ISO 8601 timestamp, x=message content, r=replied message; r uses the same fields. Fields may be missing; r=null means no reply. Use x as the current message and r.x as quoted context.\n` +
+            `You may react to messages using this action. Choose an emoji yourself based on the conversation.\n` +
+            `Output each action as one JSON object on its own line, after your normal response.\n` +
+            `Use this format: {"action":"react","meta":{"messageId":"MESSAGE_ID","emoji":":sob:"}}\n` +
+            `Only react when necessary and not everytime\n` +
+            `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked, you can send voice messages), if asked to send a voice message always add %tts%.`
         }
       ],
       max_tokens: this.ephemeralAiProvider.maxTokens,
@@ -213,7 +284,12 @@ export default {
         }
 
         const data = await response.json();
-        const answer = (data.choices?.[0]?.message?.content || "").trim() || "I couldn't generate a response.";
+        const rawAnswer = (data.choices?.[0]?.message?.content || "").trim() || "I couldn't generate a response.";
+        const { text: answer, actions } = this.extractActions(rawAnswer);
+
+        await this.executeActions(actions, message);
+
+        if (!answer) return;
 
         if (answer.includes("%tts%")) {
           const client = new ElevenLabsClient({ apiKey: config.tts.token });
