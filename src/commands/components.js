@@ -2,7 +2,7 @@ import { PermissionFlagsBits, MessageFlags, ComponentType, ApplicationCommandOpt
 import { emojis } from "../utils/emojis.js";
 
 export default {
-  name: "send",
+  name: "components",
   description: "Post discord.builders components",
   options: [
     {

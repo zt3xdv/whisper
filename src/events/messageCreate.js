@@ -25,16 +25,16 @@ export default {
   name: Events.MessageCreate,
 
   defaultEphemeralConfig: {
-    url: 'https://integrate.api.nvidia.com/v1/chat/completions',
-    authorization: config.nvidiaApiKey,
-    model: 'deepseek-ai/deepseek-v4-flash-0731',
+    url: config.ai.url,
+    authorization: config.ai.token,
+    model: config.ai.model,
     maxTokens: 512,
   },
 
   ephemeralAiProvider: {
-    url: 'https://integrate.api.nvidia.com/v1/chat/completions',
-    authorization: config.nvidiaApiKey,
-    model: 'deepseek-ai/deepseek-v4-flash-0731',
+    url: config.ai.url,
+    authorization: config.ai.token,
+    model: config.ai.model,
     maxTokens: 512,
   },
 
@@ -230,7 +230,7 @@ export default {
         const answer = (data.choices?.[0]?.message?.content || "").trim() || "I couldn't generate a response.";
 
         if (answer.includes("%tts%")) {
-          const client = new ElevenLabsClient({ apiKey: config.elevenLabsApiKey });
+          const client = new ElevenLabsClient({ apiKey: config.tts.token });
           const ttsText = answer.replace("%tts%", "").trim();
           if (!ttsText) return;
           const audio = await client.textToSpeech.convertWithTimestamps("vJVaGoR08pdjX0q5ndke", {

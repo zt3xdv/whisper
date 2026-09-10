@@ -6,7 +6,7 @@ const whitelistChannels = [
   '1269151398105448458'  // #announcements
 ];
 
-const TELEGRAM_API = `https://api.telegram.org/bot${config.telegramId}`;
+const TELEGRAM_API = `https://api.telegram.org/bot${config.telegram.botId}`;
 const TG_CAPTION_LIMIT = 1024;
 const TG_TEXT_LIMIT = 4096;
 
@@ -189,7 +189,7 @@ export default {
     if (!fullText && mediaItems.length === 0 && documentUrls.length === 0) return;
 
     try {
-      const chat_id = config.telegramChatId;
+      const chat_id = config.telegram.chatId;
 
       if (mediaItems.length === 0 && documentUrls.length === 0) {
         await sendText(chat_id, fullText);

@@ -3,7 +3,7 @@ import { buildAuditLogComponents } from "../utils/auditLogs/renderComponents.js"
 import { emojis } from "../utils/emojis.js";
 
 export default {
-  name: "auditlogs",
+  name: "audit-logs",
   description: "View server audit logs",
   permissions: ["staff"],
   

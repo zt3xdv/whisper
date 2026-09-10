@@ -26,9 +26,9 @@ export default {
   
   async execute(interaction) {
     const type = interaction.options.getString("type", true);
-    const res = await fetch(`${config.serverApiBaseUrl}/misc/statistics`, {
+    const res = await fetch(`${config.serverApi.baseUrl}/misc/statistics`, {
       headers: {
-        "Authorization": `Bearer ${config.serverApiToken}`
+        "Authorization": `Bearer ${config.serverApi.token}`
       }
     });
     const data = await res.json();

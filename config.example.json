@@ -1,22 +1,32 @@
 {
-  "token": "your_bot_token",
-  "clientId": "your_bot_id",
-  "nvidiaApiKey": "nvidia_api_key",
-  "telegramId": "telegram_forwarding_id",
-  "telegramChatId": "telegram_forwarding_chat_id",
-  "elevenLabsApiKey": "eleven_labs_tts_api_key",
-  "serverApiBaseUrl": "server_api_base_url",
-  "serverApiToken": "server_api_token",
+  "token": "bot-token",
+  "clientId": "bot-client-id",
+  "telegram": {
+    "botId": "telegram-bot-id",
+    "chatId": "telegram-chat-id"
+  },
+  "serverApi": {
+    "baseUrl": "server-api-plugin-base-url",
+    "token": "server-api-plugin-token"
+  },
+  "ai": {
+    "url": "ai-url",
+    "model": "ai-model",
+    "token": "ai-api-token"
+  },
+  "tts": {
+    "token": "eleven-labs-api-token"
+  },
   "permissions": [
     {
       "type": "role",
       "permissions": ["staff"],
-      "id": "permissioned_role_id"
+      "id": "permissioned-role-id"
     },
     {
       "type": "user",
       "permissions": ["staff", "..."],
-      "id": "permissioned_user_id"
+      "id": "permissioned-user-id"
     }
   ]
 }

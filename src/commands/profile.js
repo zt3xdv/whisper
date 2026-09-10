@@ -18,9 +18,9 @@ export default {
   async execute(interaction) {
     const username = interaction.options.getString("username", true);
     const skin = interaction.options.getString("skin");
-    const res = await fetch(`${config.serverApiBaseUrl}/player/${username}`, {
+    const res = await fetch(`${config.serverApi.baseUrl}/player/${username}`, {
       headers: {
-        "Authorization": `Bearer ${config.serverApiToken}`
+        "Authorization": `Bearer ${config.serverApi.token}`
       }
     });
     const data = await res.json();

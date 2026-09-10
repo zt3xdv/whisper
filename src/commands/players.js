@@ -7,9 +7,9 @@ export default {
   description: "Show the ServerAPI player list",
 
   async execute(interaction) {
-    const res = await fetch(`${config.serverApiBaseUrl}/players`, {
+    const res = await fetch(`${config.serverApi.baseUrl}/players`, {
       headers: {
-        "Authorization": `Bearer ${config.serverApiToken}`
+        "Authorization": `Bearer ${config.serverApi.token}`
       }
     });
     const data = await res.json();
