@@ -129,10 +129,10 @@ export default {
           content:
             `Chat history (context):\n${context}\n\n` +
             `Latest message: ${lastMessage}\n\n` +
-            `Messages are compact JSON: id=author ID, u=username, n=display name, t=ISO 8601 timestamp, x=message content, r=replied message; r uses the same fields. Fields may be missing; r=null means no reply. Use x as the current message and r.x as quoted context.\n` +
+            `Messages are compact JSON: id=author ID, mid=messageId, u=username, n=display name, t=ISO 8601 timestamp, x=message content, r=replied message; r uses the same fields. Fields may be missing; r=null means no reply. Use x as the current message and r.x as quoted context.\n` +
             `You may react to messages using this action. Choose an emoji yourself based on the conversation.\n` +
             `Output each action as one JSON object on its own line, after your normal response.\n` +
-            `Use this format: {"action":"react","meta":{"messageId":"MESSAGE_ID","emoji":":sob:"}}\n` +
+            `Use this format: {"action":"react","meta":{"messageId":"1234567891234","emoji":":sob:"}} message id SHOULD be a valid message id\n` +
             `Only react when necessary and not everytime\n` +
             `Reply naturally, add exactly %tts% at the end of your message if you want to send a voice message (only if asked, you can send voice messages), if asked to send a voice message always add %tts%.`
         }
@@ -194,6 +194,7 @@ export default {
 
       return {
         id,
+        mid: msg.id,
         ...(author.username ? { u: author.username } : {}),
         ...(name ? { n: name } : {}),
         ...(msg.createdTimestamp
