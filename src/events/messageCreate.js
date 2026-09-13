@@ -85,6 +85,8 @@ export default {
           message,
           meta: actionCall.meta ?? {}
         });
+        
+        await sleep(500);
       } catch (error) {
         console.error(`Error executing action "${actionCall.action}":`, error);
       }

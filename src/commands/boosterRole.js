@@ -58,7 +58,7 @@ export default {
     };
 
     const response = await interaction.reply(await getPayload());
-    const collector = response.createMessageComponentCollector({ time: 120000 });
+    const collector = response.createMessageComponentCollector({ time: 300000 });
 
     collector.on("collect", async (i) => {
       if (i.user.id !== user.id) return;
@@ -96,8 +96,7 @@ export default {
                 .setLabel('Name')
                 .setValue(role?.name || "")
                 .setStyle(TextInputStyle.Short)
-                // Update later with actual role name max length
-                .setMaxLength(32)
+                .setMaxLength(100)
                 .setRequired(true)
             ),
           new ActionRowBuilder()
@@ -106,7 +105,7 @@ export default {
                 .setCustomId('pc')
                 .setLabel('Primary Color')
                 .setPlaceholder('#ffffff')
-                .setValue(role?.colors?.primaryColor || "")
+                .setValue(role?.colors?.primaryColor ? "#" + role.colors.primaryColor.toString(16) : "")
                 .setStyle(TextInputStyle.Short)
                 .setRequired(true)
             ),
@@ -116,7 +115,7 @@ export default {
                 .setCustomId('sc')
                 .setLabel('Secondary Color (optional)')
                 .setPlaceholder('#ffffff')
-                .setValue(role?.colors?.secondaryColor || "")
+                .setValue(role?.colors?.secondaryColor ? "#" + role.colors.secondaryColor.toString(16) : "")
                 .setStyle(TextInputStyle.Short)
                 .setRequired(false)
             )
@@ -125,7 +124,7 @@ export default {
       await i.showModal(modal);
 
       try {
-        const submitted = await i.awaitModalSubmit({ time: 120000 });
+        const submitted = await i.awaitModalSubmit({ time: 300000 });
         
         if (activeProcesses.has(user.id)) {
           return submitted.reply({ content: `${emojis.exclamation} Please wait for the current action to finish.`, flags: MessageFlags.Ephemeral });
