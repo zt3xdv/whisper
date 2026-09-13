@@ -79,12 +79,12 @@ export default {
       }
 
       try {
-        await action.execute({
+        /*await action.execute({
           client: message.client,
           channel: message.channel,
           message,
           meta: actionCall.meta ?? {}
-        });
+        });*/
       } catch (error) {
         console.error(`Error executing action "${actionCall.action}":`, error);
       } finally {
