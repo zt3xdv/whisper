@@ -10,7 +10,7 @@ process.on("unexpectedException", console.error);
 process.on("unhandledRejection", console.error);
 
 const args = getArgs();
-const console = repl.start({ prompt: "debug> " });
+const replConsole = repl.start({ prompt: "debug> " });
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -27,7 +27,7 @@ client.db = new QuickDB({
   driver: new JSONDriver(path.join(import.meta.dirname, "..", "database.qdb"))
 });
 client.rest.setToken(config.token); // As client only sets token after login
-console.context.client = client;
+replConsole.context.client = client;
 
 for (const file of getFilesFromDir(path.join(import.meta.dirname, "commands"))) {
   const { default: command } = await import(`file://${file}`);
