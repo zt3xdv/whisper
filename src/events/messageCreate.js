@@ -59,6 +59,22 @@ export default {
         message: `Reaction ${emoji} added to message ${messageId}.`
       };
     }
+  },
+  {
+    name: "latency",
+    description: "What is your latency?",
+    arguments: {
+      type: "object",
+      properties: {},
+      required: [],
+      additionalProperties: false
+    },
+    async execute({ client }) {
+      return {
+        success: true,
+        pingMs: client.ws.ping
+      };
+    }
   }],
   
   getTts(id) {
