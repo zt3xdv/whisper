@@ -88,7 +88,7 @@ export default {
         body: JSON.stringify({
           api_key: config.webSearch.token,
           query,
-          search_depth: "basic",
+          search_depth: "advanced",
           max_results: 2,
           include_answer: true
         })
