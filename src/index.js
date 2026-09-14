@@ -1,3 +1,4 @@
+//if u didnt know, this bot is made for wispbyte, peak right also zt3 pwease accept this pr <3  
 import { Routes, ApplicationCommandManager, Client, GatewayIntentBits, Partials, Collection } from "discord.js";
 import { getFilesFromDir, getArgs } from "./utils/utils.js";
 import { JSONDriver } from "quick.db/out/drivers/JSONDriver.js";
