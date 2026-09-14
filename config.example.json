@@ -17,6 +17,9 @@
   "tts": {
     "token": "eleven-labs-api-token"
   },
+  "webSearch": {
+    "token": "tavily-web-search-token"
+  },
   "permissions": [
     {
       "type": "role",

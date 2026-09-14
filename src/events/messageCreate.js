@@ -61,6 +61,51 @@ export default {
     }
   },
   {
+    name: "webSearch",
+    description: "Make a web search to get detailed information.",
+    arguments: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "The search query"
+        }
+      },
+      required: ["query"],
+      additionalProperties: false
+    },
+    async execute({ channel, arguments: toolArguments }) {
+      const { query } = toolArguments ?? {};
+      if (!query) {
+        throw new Error("Query argument is needed for web search.");
+      }
+      
+      const res = await fetch("https://api.tavily.com/search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          api_key: config.webSearch.token,
+          query,
+          search_depth: "basic",
+          max_results: 2,
+          include_answer: true
+        })
+      });
+      const data = await res.text();
+      
+      if (!res.ok) {
+        throw new Error(`Web search failed with status ${res.status}: ${data}`);
+      }
+      
+      return {
+        success: true,
+        data
+      };
+    }
+  },
+  {
     name: "ping",
     description: "What is your websocket ping?",
     arguments: {
