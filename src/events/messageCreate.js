@@ -61,8 +61,8 @@ export default {
     }
   },
   {
-    name: "latency",
-    description: "What is your latency?",
+    name: "ping",
+    description: "What is your websocket ping?",
     arguments: {
       type: "object",
       properties: {},
@@ -72,7 +72,7 @@ export default {
     async execute({ client }) {
       return {
         success: true,
-        pingMs: client.ws.ping
+        ping: `${client.ws.ping}ms`
       };
     }
   }],
@@ -318,6 +318,7 @@ export default {
   
   async execute(message) {
     let retryCount = 0;
+    let lastReply;
     while (retryCount <= this.maxRetries) {
       let interval;
       try {
@@ -398,7 +399,7 @@ export default {
           const { text: answer, tools: toolCalls } = this.extractTools(rawAnswer);
           
           if (answer) {
-            await this.sendAiAnswer(answer, message);
+            lastReply = await this.sendAiAnswer(answer, lastReply ?? message);
           }
           
           if (!toolCalls.length) return;
