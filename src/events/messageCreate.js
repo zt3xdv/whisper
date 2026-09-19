@@ -228,7 +228,7 @@ export default {
     return message.reply({
       content: answer,
       allowedMentions: {
-        parse: []
+        parse: [ 'users' ]
       }
     });
   },
