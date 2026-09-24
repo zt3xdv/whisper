@@ -259,14 +259,8 @@ export default {
       messages: [
         {
           role: "system",
-          content: systemPrompt || ""
-        },
-        {
-          role: "user",
           content:
-            `Current date and time: ${currentTime} (${timeZone}).\n` +
-            `Chat history:\n${context}\n\n` +
-            `Latest message:\n${lastMessage}\n\n` +
+            (systemPrompt || "") +
             `Use content as the current message content and reply.content as quoted context.\n\n` +
             `Available tools:\n${this.getToolsPrompt()}\n\n` +
             `Tool rules:\n` +
@@ -280,7 +274,14 @@ export default {
             `- Never place tool JSON inside a Markdown code block.\n` +
             `- If no tool is necessary, do not output any tool JSON.\n` +
             (toolsAvailable ? "" : `- Tool execution is disabled for this response. Do not output tool calls.\n`) +
-            (toolResults ? `\nResults from tools executed previously:\n${toolResults}\n` + `Use those results to produce the next natural response.\n` : "") +
+            (toolResults ? `\nResults from tools executed previously:\n${toolResults}\n` + `Use those results to produce the next natural response.\n` : "")
+        },
+        {
+          role: "user",
+          content:
+            `Current date and time: ${currentTime} (${timeZone}).\n` +
+            `Chat history:\n${context}\n\n` +
+            `Latest message:\n${lastMessage}\n\n` +
             `\nReply naturally. Add exactly %tts% at the end of your message if you want to send a voice message. ` +
             `Only send voice messages when asked. If asked to send one, always add %tts%.`
         }
