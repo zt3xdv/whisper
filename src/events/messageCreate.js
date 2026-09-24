@@ -260,8 +260,8 @@ export default {
         {
           role: "system",
           content:
-            (systemPrompt || "") +
-            `Use content as the current message content and reply.content as quoted context.\n\n` +
+            (systemPrompt || "") + // this is enough for it to not use tools i guess
+            `Use content as the current message content and reply.content as quoted context.\n\n`/* +
             `Available tools:\n${this.getToolsPrompt()}\n\n` +
             `Tool rules:\n` +
             `- Only use tools from the Available tools list.\n` +
@@ -274,7 +274,7 @@ export default {
             `- Never place tool JSON inside a Markdown code block.\n` +
             `- If no tool is necessary, do not output any tool JSON.\n` +
             (toolsAvailable ? "" : `- Tool execution is disabled for this response. Do not output tool calls.\n`) +
-            (toolResults ? `\nResults from tools executed previously:\n${toolResults}\n` + `Use those results to produce the next natural response.\n` : "")
+            (toolResults ? `\nResults from tools executed previously:\n${toolResults}\n` + `Use those results to produce the next natural response.\n` : "")*/
         },
         {
           role: "user",
