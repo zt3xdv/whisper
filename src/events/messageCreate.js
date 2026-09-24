@@ -1,4 +1,4 @@
-7import { Events } from "discord.js";
+import { Events } from "discord.js";
 import config from "../../config.json" with { type: "json" };
 import { Settings } from "../utils/settings.js";
 import { truncateByChars, formatMentionsInContent } from "../utils/utils.js";
