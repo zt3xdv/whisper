@@ -1,4 +1,4 @@
-import { Events } from "discord.js";
+7import { Events } from "discord.js";
 import config from "../../config.json" with { type: "json" };
 import { Settings } from "../utils/settings.js";
 import { truncateByChars, formatMentionsInContent } from "../utils/utils.js";
@@ -29,7 +29,7 @@ export default {
     maxTokens: 512
   },
   
-  tools: [{
+  tools: [/*{
     name: "react",
     description: "Add a Unicode emoji reaction to a message in the current channel.",
     arguments: {
@@ -59,7 +59,7 @@ export default {
         message: `Reaction ${emoji} added to message ${messageId}.`
       };
     }
-  },
+  },*/
   {
     name: "webSearch",
     description: "Make a web search to get detailed information.",
