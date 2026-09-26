@@ -282,7 +282,7 @@ export default {
             `Current date and time: ${currentTime} (${timeZone}).\n` +
             `Chat history:\n${context}\n\n` +
             `Latest message:\n${lastMessage}\n\n` +
-            `\nReply naturally. Add exactly %tts% at the end of your message if you want to send a voice message. ` +
+           // `\nReply naturally. Add exactly %tts% at the end of your message if you want to send a voice message. ` +
             `Only send voice messages when asked. If asked to send one, always add %tts%.`
         }
       ],
