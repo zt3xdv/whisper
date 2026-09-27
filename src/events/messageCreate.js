@@ -386,7 +386,7 @@ export default {
  			messageId: any;
 		}
  */
-		return `${displayName} (${username}) at ${timestamp} ${reply && `(replying to ${reply})`} with content: ${content}`
+		return `${displayName} (${username}) at ${timestamp} ${reply && `(replying to "${reply.content}" from ${reply.displayName})`} with content: ${content}`
 		return JSON.stringify(result, (key, value) => typeof value === "string" ? value.replaceAll("\\n", "\\\\n") : value).replace(/(?<!\\)\\n/g, "\n");
 	},
 	
