@@ -123,8 +123,10 @@ export default {
 
       await i.showModal(modal);
 
+      let submitted;
+
       try {
-        const submitted = await i.awaitModalSubmit({ time: 300000 });
+        submitted = await i.awaitModalSubmit({ time: 300000 });
         
         if (activeProcesses.has(user.id)) {
           return submitted.reply({ content: `${emojis.exclamation} Please wait for the current action to finish.`, flags: MessageFlags.Ephemeral });
@@ -181,9 +183,11 @@ export default {
           console.log(err);
         }
         
-        try {
-          i.followUp({ content: replyContent, flags: MessageFlags.Ephemeral });
-        } catch (e) {}
+        if (submitted) {
+          try {
+            submitted.reply({ content: replyContent, flags: MessageFlags.Ephemeral });
+          } catch (e) {}
+        }
       } finally {
         activeProcesses.delete(user.id);
         await interaction.editReply(await getPayload(false)).catch(() => {});
