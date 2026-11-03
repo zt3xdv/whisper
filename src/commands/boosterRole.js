@@ -182,10 +182,8 @@ export default {
         }
         
         try {
-          i.reply({ content: replyContent, flags: MessageFlags.Ephemeral }).catch(() => {});
-        } catch (e) {
-          // If interaction is already replied or expired
-        }
+          i.followUp({ content: replyContent, flags: MessageFlags.Ephemeral });
+        } catch (e) {}
       } finally {
         activeProcesses.delete(user.id);
         await interaction.editReply(await getPayload(false)).catch(() => {});
