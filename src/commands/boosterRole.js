@@ -105,21 +105,11 @@ export default {
                 .setCustomId('pc')
                 .setLabel('Primary Color')
                 .setPlaceholder('#ffffff')
-                .setValue(role?.colors?.primaryColor ? "#" + role.colors.primaryColor.toString(16) : "")
+                .setValue(role?.colors?.primaryColor ? "#" + role.colors.primaryColor.toString(16).padStart(6, "0") : "")
                 .setStyle(TextInputStyle.Short)
                 .setRequired(true)
             ),
-          new ActionRowBuilder()
-            .addComponents(
-              new TextInputBuilder()
-                .setCustomId('sc')
-                .setLabel('Secondary Color (optional)')
-                .setPlaceholder('#ffffff')
-                .setValue(role?.colors?.secondaryColor ? "#" + role.colors.secondaryColor.toString(16) : "")
-                .setStyle(TextInputStyle.Short)
-                .setRequired(false)
-            )
-        );
+          );
 
       await i.showModal(modal);
 
@@ -135,16 +125,15 @@ export default {
 
         const name = submitted.fields.getTextInputValue('n');
         const primaryColor = submitted.fields.getTextInputValue('pc');
-        const secondaryColor = submitted.fields.getTextInputValue('sc');
         const colorRegex = /^#([0-9A-F]{3}){1,2}$/i;
 
-        if (!colorRegex.test(primaryColor) || (secondaryColor && !colorRegex.test(secondaryColor))) {
+        if (!colorRegex.test(primaryColor)) {
           activeProcesses.delete(user.id);
           await interaction.editReply(await getPayload(false));
           return submitted.reply({ content: `${emojis.exclamation} Invalid Hex color format, Check your inputs`, flags: MessageFlags.Ephemeral });
         }
-        
-        const colors = { primaryColor, secondaryColor: secondaryColor || undefined };
+
+        const colors = { primaryColor };
         const currentRoleId = await client.db.get(`br_${guild.id}_${user.id}`);
         let currentRole = currentRoleId ? guild.roles.cache.get(currentRoleId) : null;
 
@@ -163,7 +152,15 @@ export default {
 
         await submitted.reply({ content: `${emojis.correct} Your booster role has been updated!`, flags: MessageFlags.Ephemeral });
       } catch (err) {
-        if (err.code !== 'InteractionCollectorError') console.error(err);
+        if (err.code == 'InteractionCollectorError') return;
+        if (err.code !== 670006) console.log(err);
+
+        let replyContent = `${emojis.exclamation} Failed to update your role.`;
+        if (err.code === 670006) {
+          replyContent = `${emojis.exclamation} This guild seems to not support secondary colors in roles, try using primary only`;
+        }
+        
+        await submitted.reply({ content: replyContent, flags: MessageFlags.Ephemeral }).catch(() => {});
       } finally {
         activeProcesses.delete(user.id);
         await interaction.editReply(await getPayload(false)).catch(() => {});
