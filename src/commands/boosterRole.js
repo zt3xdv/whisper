@@ -153,11 +153,12 @@ export default {
         await submitted.reply({ content: `${emojis.correct} Your booster role has been updated!`, flags: MessageFlags.Ephemeral });
       } catch (err) {
         if (err.code == 'InteractionCollectorError') return;
-        if (err.code !== 670006) console.log(err);
 
         let replyContent = `${emojis.exclamation} Failed to update your role.`;
         if (err.code === 670006) {
           replyContent = `${emojis.exclamation} This guild seems to not support secondary colors in roles, try using primary only`;
+        } else {
+          console.log(err);
         }
         
         await submitted.reply({ content: replyContent, flags: MessageFlags.Ephemeral }).catch(() => {});
