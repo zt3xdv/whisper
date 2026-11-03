@@ -3,12 +3,12 @@ import { Settings } from "../settings.js";
 import { checkPermission } from "../permissions.js";
 import { emojis } from "../emojis.js"
 
-export async function buildComponentsV2(client, user, currentPage, itemsPerPage) {
+export async function buildComponentsV2(client, user, currentPage, itemsPerPage, guildId = null) {
   const startIndex = currentPage * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, Settings.settingsDefinitions.length);
   const userSettings = Settings.settingsDefinitions.filter(setting => !setting.global || checkPermission(user, "staff"));
   const currentSettings = userSettings.slice(startIndex, endIndex);
-  
+
   const container = {
     type: ComponentType.Container,
     components: [
@@ -20,7 +20,7 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage)
   };
 
   for (const setting of currentSettings) {
-    const value = await Settings.get(client.db, user.id, setting.key) ?? null;
+    const value = await Settings.get(client.db, user.id, setting.key, guildId) ?? null;
 
     container.components.push({
       type: ComponentType.TextDisplay,

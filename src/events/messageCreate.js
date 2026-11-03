@@ -325,10 +325,11 @@ export default {
 				const includesWhisper = message.content.toLowerCase().includes("whisper");
 				if (!mentioned && !includesWhisper) return;
 				
+				const guildId = message.guild?.id;
 				const [users, channels, roles] = await Promise.all([
-					Settings.get(message.client.db, null, "whitelistedUsers"),
-					Settings.get(message.client.db, null, "whitelistedChannels"),
-					Settings.get(message.client.db, null, "whitelistedRoles")
+					Settings.get(message.client.db, null, "whitelistedUsers", guildId),
+					Settings.get(message.client.db, null, "whitelistedChannels", guildId),
+					Settings.get(message.client.db, null, "whitelistedRoles", guildId)
 				]);
 				if (!channels.includes(message.channel.id)) return;
 				

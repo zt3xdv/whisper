@@ -10,14 +10,14 @@ export default {
 
   async execute(interaction) {
     await interaction.deferReply();
-    
+
     const user = interaction.member ?? interaction.user;
     const itemsPerPage = 3;
     let currentPage = 0;
     let lastReply;
-    
+
     const updateMessage = async () => {
-      const payload = await buildComponentsV2(interaction.client, user, currentPage, itemsPerPage);
+      const payload = await buildComponentsV2(interaction.client, user, currentPage, itemsPerPage, interaction.guildId);
       lastReply = await interaction.editReply(payload);
     };
 
@@ -47,7 +47,7 @@ export default {
         const setting = Settings.settingsDefinitions.find(s => s.key === settingKey);
         if (!setting) return;
 
-        await Settings.put(interaction.client.db, user.id, setting.key, newValue);
+        await Settings.put(interaction.client.db, user.id, setting.key, newValue, interaction.guildId);
         await updateMessage();
       } catch (err) {}
     });
@@ -82,9 +82,9 @@ export default {
           const setting = Settings.settingsDefinitions.find(s => s.key === settingKey);
           if (!setting) return;
 
-          const currentValue = await Settings.get(interaction.client.db, user.id, setting.key);
+          const currentValue = await Settings.get(interaction.client.db, user.id, setting.key, interaction.guildId);
           const newValue = !Boolean(currentValue);
-          await Settings.put(interaction.client.db, user.id, setting.key, newValue);
+          await Settings.put(interaction.client.db, user.id, setting.key, newValue, interaction.guildId);
           await updateMessage();
           return;
         }
@@ -94,7 +94,7 @@ export default {
           const setting = Settings.settingsDefinitions.find(s => s.key === settingKey);
           if (!setting) return;
 
-          const currentValue = await Settings.get(interaction.client.db, user.id, setting.key);
+          const currentValue = await Settings.get(interaction.client.db, user.id, setting.key, interaction.guildId);
           await btnInt.reply({
             content: `-# **${setting.name ?? setting.key}**\n\`\`\`${JSON.stringify(currentValue, null, 2)}\`\`\``,
             flags: MessageFlags.Ephemeral
@@ -107,7 +107,7 @@ export default {
           const setting = Settings.settingsDefinitions.find(s => s.key === settingKey);
           if (!setting) return;
 
-          const currentValue = await Settings.get(interaction.client.db, user.id, setting.key);
+          const currentValue = await Settings.get(interaction.client.db, user.id, setting.key, interaction.guildId);
           const modalCustomId = `modal_edit_${settingKey}_${Date.now()}`;
           const modal = createEditModal(modalCustomId, setting, currentValue);
 
@@ -133,7 +133,7 @@ export default {
               if (isNaN(rawValue)) return;
             }
 
-            await Settings.put(interaction.client.db, user.id, setting.key, rawValue);
+            await Settings.put(interaction.client.db, user.id, setting.key, rawValue, interaction.guildId);
             await updateMessage();
           } catch (err) {}
           return;

@@ -13,7 +13,7 @@ export class Settings {
     {
       key: "whitelistedRoles",
       type: "role",
-      global: true,
+      guild: true,
       defaultValue: [],
       name: "Whitelisted Roles",
       description: "Roles that can use Whisper AI"
@@ -21,7 +21,7 @@ export class Settings {
     {
       key: "whitelistedUsers",
       type: "user",
-      global: true,
+      guild: true,
       defaultValue: [],
       name: "Whitelisted Users",
       description: "Users that can use Whisper AI"
@@ -29,7 +29,7 @@ export class Settings {
     {
       key: "whitelistedChannels",
       type: "channel",
-      global: true,
+      guild: true,
       defaultValue: [],
       name: "Whitelisted Channels",
       description: "Where can Whisper yap around?"
@@ -40,7 +40,6 @@ export class Settings {
       min: 5,
       max: 70,
       defaultValue: 30,
-      global: true,
       required: true,
       name: "Max Context Messages",
       description: "How much messages can Whisper read since last message"
@@ -51,22 +50,23 @@ export class Settings {
       min: 100,
       max: 600,
       defaultValue: 500,
-      global: true,
       required: true,
       name: "Max Message Length",
       description: "Max length of the messages that Whisper will read"
     },
   ]
 
-  static async get(client, userId, settingKey, ...path) {
+  static async get(client, userId, settingKey, guildId = null, ...path) {
     const definition = this.settingsDefinitions.find(s => s.key === settingKey)
     if (!definition) {
       throw new Error(`Setting '${settingKey}' not found`)
     }
 
-    const baseKey = !definition.global
-      ? `user_settings.${userId}.${settingKey}`
-      : `global_settings.${settingKey}`
+    const baseKey = definition.guild && guildId
+      ? `guild_settings.${guildId}.${settingKey}`
+      : definition.guild
+      ? `guild_settings.${settingKey}`
+      : `user_settings.${userId}.${settingKey}`
     const fullKey = path.length > 0 ? `${baseKey}.${path.join(".")}` : baseKey
 
     let value = await client.get(fullKey)
@@ -76,7 +76,7 @@ export class Settings {
         return definition.defaultValue
       }
       value = definition.defaultValue
-      await this.put(client, userId, settingKey, value)
+      await this.put(client, userId, settingKey, value, guildId)
     }
 
     if (path.length === 0 && this.validateValue(value, definition) === false) {
@@ -86,7 +86,7 @@ export class Settings {
     return value
   }
 
-  static async put(client, userId, settingKey, value, ...path) {
+  static async put(client, userId, settingKey, value, guildId = null, ...path) {
     const definition = this.settingsDefinitions.find(s => s.key === settingKey)
     if (!definition) {
       throw new Error(`Setting '${settingKey}' not found`)
@@ -96,9 +96,11 @@ export class Settings {
       throw new Error(`Invalid value for setting '${settingKey}'`)
     }
 
-    const baseKey = !definition.global
-      ? `user_settings.${userId}.${settingKey}`
-      : `global_settings.${settingKey}`
+    const baseKey = definition.guild && guildId
+      ? `guild_settings.${guildId}.${settingKey}`
+      : definition.guild
+      ? `guild_settings.${settingKey}`
+      : `user_settings.${userId}.${settingKey}`
     const fullKey = path.length > 0 ? `${baseKey}.${path.join(".")}` : baseKey
 
     await client.set(fullKey, value)
@@ -136,10 +138,24 @@ export class Settings {
     return true
   }
 
-  static async getAllForUser(client, userId) {
+  static async getAllForUser(client, userId, guildId = null) {
     const result = {}
     for (const definition of this.settingsDefinitions) {
-      result[definition.key] = await this.get(client, userId, definition.key)
+      if (definition.guild && guildId) {
+        result[definition.key] = await this.get(client, null, definition.key, guildId)
+      } else {
+        result[definition.key] = await this.get(client, userId, definition.key)
+      }
+    }
+    return result
+  }
+
+  static async getAllForGuild(client, guildId) {
+    const result = {}
+    for (const definition of this.settingsDefinitions) {
+      if (definition.guild) {
+        result[definition.key] = await this.get(client, null, definition.key, guildId)
+      }
     }
     return result
   }
@@ -147,6 +163,14 @@ export class Settings {
   static async resetAllForUser(client, userId) {
     for (const definition of this.settingsDefinitions) {
       await this.put(client, userId, definition.key, definition.defaultValue)
+    }
+  }
+
+  static async resetAllForGuild(client, guildId) {
+    for (const definition of this.settingsDefinitions) {
+      if (definition.guild) {
+        await this.put(client, null, definition.key, definition.defaultValue, guildId)
+      }
     }
   }
 }
