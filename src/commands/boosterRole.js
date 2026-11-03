@@ -109,6 +109,16 @@ export default {
                 .setStyle(TextInputStyle.Short)
                 .setRequired(true)
             ),
+          new ActionRowBuilder()
+            .addComponents(
+              new TextInputBuilder()
+                .setCustomId('sc')
+                .setLabel('Secondary Color (Optional)')
+                .setPlaceholder('#ffffff')
+                .setValue(role?.colors?.secondaryColor ? "#" + role.colors.secondaryColor.toString(16).padStart(6, "0") : "")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(false)
+            ),
           );
 
       await i.showModal(modal);
@@ -125,6 +135,7 @@ export default {
 
         const name = submitted.fields.getTextInputValue('n');
         const primaryColor = submitted.fields.getTextInputValue('pc');
+        const secondaryColor = submitted.fields.getTextInputValue('sc');
         const colorRegex = /^#([0-9A-F]{3}){1,2}$/i;
 
         if (!colorRegex.test(primaryColor)) {
@@ -133,7 +144,16 @@ export default {
           return submitted.reply({ content: `${emojis.exclamation} Invalid Hex color format, Check your inputs`, flags: MessageFlags.Ephemeral });
         }
 
+        if (secondaryColor && !colorRegex.test(secondaryColor)) {
+          activeProcesses.delete(user.id);
+          await interaction.editReply(await getPayload(false));
+          return submitted.reply({ content: `${emojis.exclamation} Invalid Hex color format for secondary color, Check your inputs`, flags: MessageFlags.Ephemeral });
+        }
+
         const colors = { primaryColor };
+        if (secondaryColor) {
+          colors.secondaryColor = secondaryColor;
+        }
         const currentRoleId = await client.db.get(`br_${guild.id}_${user.id}`);
         let currentRole = currentRoleId ? guild.roles.cache.get(currentRoleId) : null;
 
