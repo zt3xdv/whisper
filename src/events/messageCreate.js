@@ -180,7 +180,7 @@ export default {
 
         return message.reply({
             content,
-            files: attachments.length > 0 ? attachments : undefinez,
+            files: attachments?.length > 0 ? attachments : undefinez,
             allowedMentions: {
                 parse: ['users']
             }
