@@ -123,69 +123,34 @@ export default {
 		}
 	},
 	
-    async processCodeBlocksWithFiles(content) {
-        if (!content) return { content, attachments: [] };
-
-        const blockPattern = /```(\w+)\s+(\S+)\n([\s\S]*?)```/g;
-        const attachments = [];
-        let processedContent = content;
-        let match;
-        let blockIndex = 0;
-
-        while ((match = blockPattern.exec(content)) !== null) {
-            const [fullMatch, language, filename, codeBlock] = match;
-            const code = codeBlock.trim();
-
-            if (code.length < 50) {
-                continue;
-            }
-
-            const attachment = {
-                attachment: Buffer.from(code, "utf-8"),
-                name: filename,
-            };
-
-            attachments.push(attachment);
-            const replacement = `\`\`\`${language}\n${code.substring(0, 50)}...\n\`\`\``;
-            processedContent = processedContent.replace(fullMatch, replacement);
-            blockIndex++;
-        }
-
-        return { content: processedContent, attachments };
-    },
-    
-    async sendAiAnswer(answer, message) {
-        if (!answer) return null;
-        if (answer.includes("%tts%")) {
-            const ttsText = answer.replace("%tts%", "").trim();
-            if (!ttsText) return null;
-            const audio = await this.ttsClient.textToSpeech.convertWithTimestamps("vJVaGoR08pdjX0q5ndke", {
-                text: ttsText,
-                languageCode: "en",
-                modelId: "eleven_flash_v2_5",
-                outputFormat: "opus_48000_192"
-            });
-            const buffer = Buffer.from(audio.audioBase64, "base64");
-            const replyMessage = await message.reply({
-                files: [{
-                    attachment: buffer,
-                    name: "tts.opus"
-                }]
-            });
-            this.setTts(replyMessage.id, ttsText);
-            return replyMessage;
-        }
-
-        const { content, attachments } = this.processCodeBlocksWithFiles(answer);
-
-        return message.reply({
-            content,
-            files: attachments?.length > 0 ? attachments : undefined,
-            allowedMentions: {
-                parse: ['users']
-            }
-        });
-    },
+	async sendAiAnswer(answer, message) {
+		if (!answer) return null;
+		if (answer.includes("%tts%")) {
+			const ttsText = answer.replace("%tts%", "").trim();
+			if (!ttsText) return null;
+			const audio = await this.ttsClient.textToSpeech.convertWithTimestamps("vJVaGoR08pdjX0q5ndke", {
+				text: ttsText,
+				languageCode: "en",
+				modelId: "eleven_flash_v2_5",
+				outputFormat: "opus_48000_192"
+			});
+			const buffer = Buffer.from(audio.audioBase64, "base64");
+			const replyMessage = await message.reply({
+				files: [{
+					attachment: buffer,
+					name: "tts.opus"
+				}]
+			});
+			this.setTts(replyMessage.id, ttsText);
+			return replyMessage;
+		}
+		return message.reply({
+			content: answer,
+			allowedMentions: {
+				parse: [ 'users' ]
+			}
+		});
+	},
 	
 	setEphemeralAiProvider(url, authorization, model, maxTokens) {
 		this.ephemeralAiProvider = {
@@ -266,12 +231,7 @@ export default {
 					`Current date and time: ${currentTime} (${timeZone}).\n` +
 					`Use content as the current message content and reply.content as quoted context.\n\n` +
 					`Reply naturally. Add exactly %tts% at the end of your message if you want to send a voice message.\n` +
-					`Only send voice messages when asked. If asked to send one, always add %tts%.\n` +
-                    `When sending a long codeblock (not always), use this example format:\n` +
-                    `\`\`\`js filename.js\n` +
-                    `code\n` +
-                    `\`\`\`\n` +
-                    `where filename.js is a valid file name`
+					`Only send voice messages when asked. If asked to send one, always add %tts%.`
 			},
 			{
 				role: "user",
