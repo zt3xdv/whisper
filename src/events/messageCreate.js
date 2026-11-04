@@ -126,13 +126,13 @@ export default {
     async processCodeBlocksWithFiles(content) {
         if (!content) return { content, attachments: [] };
 
-        const BLOCK_PATTERN = /```(\w+)\s+(\S+)\n([\s\S]*?)```/g;
+        const blockPattern = /```(\w+)\s+(\S+)\n([\s\S]*?)```/g;
         const attachments = [];
         let processedContent = content;
         let match;
         let blockIndex = 0;
 
-        while ((match = BLOCK_PATTERN.exec(content)) !== null) {
+        while ((match = blockPattern.exec(content)) !== null) {
             const [fullMatch, language, filename, codeBlock] = match;
             const code = codeBlock.trim();
 
@@ -178,18 +178,9 @@ export default {
 
         const { content, attachments } = this.processCodeBlocksWithFiles(answer);
 
-        if (attachments.length > 0) {
-            return message.reply({
-                content,
-                files: attachments,
-                allowedMentions: {
-                    parse: ['users']
-                }
-            });
-        }
-
         return message.reply({
             content,
+            files: attachments.length > 0 ? attachments : undefinez,
             allowedMentions: {
                 parse: ['users']
             }
