@@ -18,14 +18,14 @@ export default {
 		url: config.ai.url,
 		authorization: config.ai.token,
 		model: config.ai.model,
-		maxTokens: 512
+		maxTokens: config.ai.maxTokens
 	},
 	
 	ephemeralAiProvider: {
 		url: config.ai.url,
 		authorization: config.ai.token,
 		model: config.ai.model,
-		maxTokens: 512
+		maxTokens: config.ai.maxTokens
 	},
 	
 	tools: [{

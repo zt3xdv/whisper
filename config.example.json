@@ -12,7 +12,8 @@
   "ai": {
     "url": "ai-url",
     "model": "ai-model",
-    "token": "ai-api-token"
+    "token": "ai-api-token",
+    "maxTokens": 512
   },
   "tts": {
     "token": "eleven-labs-api-token"
