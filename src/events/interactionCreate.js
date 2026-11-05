@@ -41,7 +41,7 @@ export default {
         console.error(e);
       }
     }
-    else if (interaction.isAutoComplete()) {
+    else if (interaction.isAutocomplete()) {
       const command = interaction.client.commands.get(interaction.commandName);
       if (!command || !command.autocomplete) return;
       
