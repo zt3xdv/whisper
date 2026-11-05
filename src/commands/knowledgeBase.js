@@ -1,4 +1,4 @@
-import { MessageFlags, ComponentType } from "discord.js";
+import { MessageFlags, ComponentType, ApplicationCommandOptionType } from "discord.js";
 
 import articles from '../utils/knowledgeBaseArticles.json' with { type: 'json' };
 
