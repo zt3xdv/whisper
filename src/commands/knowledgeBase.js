@@ -41,7 +41,7 @@ export default {
 
   async autocomplete(interaction) {
     const articleList = Object.keys(articles);
-    const input = interaction.options.getString('tag_name');
+    const input = interaction.options.getString('article');
 
     if (input === '') {
       const filteredArticles = articleList.slice(0, 25);
