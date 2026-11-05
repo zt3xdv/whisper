@@ -7,38 +7,45 @@ export default {
   id: "interactionCreate",
   name: Events.InteractionCreate,
   async execute(interaction) {
-    if (!interaction.isChatInputCommand()) return;
+    if (interaction.isChatInputCommand()) {
 
-    const command = interaction.client.commands.get(interaction.commandName);
-    if (!command) return;
+      const command = interaction.client.commands.get(interaction.commandName);
+      if (!command) return;
     
-    try {
-      if (command.permissions) {
-        const hasPermission = command.permissions.some(permission => 
-          checkPermission(interaction.member, permission)
-        );
+      try {
+        if (command.permissions) {
+          const hasPermission = command.permissions.some(permission =>
+            checkPermission(interaction.member, permission)
+          );
 
-        if (!hasPermission) {
-          return await interaction.reply({
-            components: [
-              {
-                type: ComponentType.Container,
-                components: [
-                  {
-                    type: ComponentType.TextDisplay,
-                    content: `${emojis.exclamation} You don't have permission to run this command`
-                  }
-                ]
-              }
-            ],
-            flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral
-          });
+          if (!hasPermission) {
+            return await interaction.reply({
+              components: [
+                {
+                  type: ComponentType.Container,
+                  components: [
+                    {
+                      type: ComponentType.TextDisplay,
+                      content: `${emojis.exclamation} You don't have permission to run this command`
+                    }
+                  ]
+                }
+              ],
+              flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral
+            });
+          }
         }
-      }
 
-      await command.execute(interaction);
-    } catch (e) {
-      console.error(e);
+        await command.execute(interaction);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    else if (interaction.isAutoComplete()) {
+      const command = interaction.client.commands.get(interaction.commandName);
+      if (!command || !command.autocomplete) return;
+      
+      command.autocomplete(interaction);
     }
   }
 };
