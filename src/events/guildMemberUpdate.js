@@ -6,6 +6,8 @@ export default {
   name: Events.GuildMemberUpdate,
   async execute(oldMember, newMember) {
     // This never gets fired since whisper doesn't have the intents for it
+    // thats sad
+    
     if (oldMember.premiumSince && !newMember.premiumSince && !checkPermission(newMember, "staff")) {
       const { guild, client, user } = newMember;
       const key = `br_${guild.id}_${user.id}`;
