@@ -72,6 +72,43 @@ export default {
 				data
 			};
 		}
+	}, {
+		name: "wispStatus",
+		description: "Get Wispbyte hosting status including online/offline nodes, incidents, and degraded nodes.",
+		parameters: {
+			type: "object",
+			properties: {},
+			required: [],
+			additionalProperties: false
+		},
+		async execute() {
+			const baseUrl = 'https://wispbyte.com/client/api';
+			const getJson = async (url) => {
+				const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', Accept: 'application/json' }, cache: 'no-store' });
+				return res.ok ? res.json() : null;
+			};
+			const [status, incidents] = await Promise.all([getJson(`${BASE}/status`), getJson(`${baseUrl}/status/incidents`)]);
+			if (!status) throw new Error('Failed to fetch Wispbyte status');
+			const nodes = status.nodes || [];
+			return {
+				timestamp: new Date().toISOString(),
+				summary: {
+					overall: status.summary?.overall,
+					online: nodes.filter(n => n.status === 'online').length,
+					offline: nodes.filter(n => n.status === 'offline').length,
+					degraded: nodes.filter(n => n.status === 'degraded').length,
+					total: nodes.length,
+					lastCheckedAt: status.summary?.lastCheckedAt,
+					uptime30dFree: status.summary?.uptime30dFree,
+					uptime30dPremium: status.summary?.uptime30dPremium
+				},
+				offlineNodes: nodes.filter(n => n.status === 'offline').map(n => ({ id: n.id, name: n.friendlyName, lastError: n.lastError })).slice(0, 5),
+				degradedNodes: nodes.filter(n => n.status === 'degraded').map(n => ({ id: n.id, name: n.friendlyName, lastError: n.lastError })).slice(0, 5),
+				activeIncidents: (incidents?.active || []).map(i => ({ id: i.id, title: i.title, impact: i.impact, status: i.status, startedAt: i.startedAt, resolvedAt: i.resolvedAt, components: i.components, updates: i.updates?.map(u => ({ message: u.message, createdAt: u.createdAt, status: u.status })) })),
+				pastIncidents: (incidents?.recent || []).map(i => ({ id: i.id, title: i.title, impact: i.impact, status: i.status, startedAt: i.startedAt, resolvedAt: i.resolvedAt, components: i.components })),
+				maintenanceIncidents: (incidents?.maintenance || []).map(i => ({ id: i.id, title: i.title, impact: i.impact, status: i.status, startedAt: i.startedAt, resolvedAt: i.resolvedAt, scheduledStart: i.scheduledStart, scheduledEnd: i.scheduledEnd, components: i.components }))
+			};
+		}
 	}],
 	
 	getTts(id) {
