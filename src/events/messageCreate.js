@@ -87,7 +87,7 @@ export default {
 				const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', Accept: 'application/json' }, cache: 'no-store' });
 				return res.ok ? res.json() : null;
 			};
-			const [status, incidents] = await Promise.all([getJson(`${BASE}/status`), getJson(`${baseUrl}/status/incidents`)]);
+			const [status, incidents] = await Promise.all([getJson(`${baseUrl}/status`), getJson(`${baseUrl}/status/incidents`)]);
 			if (!status) throw new Error('Failed to fetch Wispbyte status');
 			const nodes = status.nodes || [];
 			return {
