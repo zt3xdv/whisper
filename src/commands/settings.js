@@ -2,6 +2,7 @@ import { ComponentType, MessageFlags } from "discord.js";
 import { Settings } from "../utils/settings.js";
 import { buildComponentsV2 } from "../utils/settings/renderComponents.js";
 import { createEditModal } from "../utils/settings/modal.js";
+import { checkPermission } from "../utils/permissions.js";
 import { emojis } from "../utils/emojis.js";
 
 export default {
@@ -47,6 +48,10 @@ export default {
         const setting = Settings.settingsDefinitions.find(s => s.key === settingKey);
         if (!setting) return;
 
+        if (setting.permissions?.length && !setting.permissions.some(p => checkPermission(user, p))) {
+          return;
+        }
+
         await Settings.put(interaction.client.db, user.id, setting.key, newValue, interaction.guildId);
         await updateMessage();
       } catch (err) {}
@@ -82,6 +87,10 @@ export default {
           const setting = Settings.settingsDefinitions.find(s => s.key === settingKey);
           if (!setting) return;
 
+          if (setting.permissions?.length && !setting.permissions.some(p => checkPermission(user, p))) {
+            return;
+          }
+
           const currentValue = await Settings.get(interaction.client.db, user.id, setting.key, interaction.guildId);
           const newValue = !Boolean(currentValue);
           await Settings.put(interaction.client.db, user.id, setting.key, newValue, interaction.guildId);
@@ -106,6 +115,10 @@ export default {
           const settingKey = id.substring(5);
           const setting = Settings.settingsDefinitions.find(s => s.key === settingKey);
           if (!setting) return;
+
+          if (setting.permissions?.length && !setting.permissions.some(p => checkPermission(user, p))) {
+            return;
+          }
 
           const currentValue = await Settings.get(interaction.client.db, user.id, setting.key, interaction.guildId);
           const modalCustomId = `modal_edit_${settingKey}_${Date.now()}`;

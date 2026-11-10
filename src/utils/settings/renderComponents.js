@@ -6,7 +6,9 @@ import { emojis } from "../emojis.js"
 export async function buildComponentsV2(client, user, currentPage, itemsPerPage, guildId = null) {
   const startIndex = currentPage * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, Settings.settingsDefinitions.length);
-  const userSettings = Settings.settingsDefinitions.filter(setting => !setting.global || checkPermission(user, "staff"));
+  const userSettings = Settings.settingsDefinitions.filter(setting => 
+    !setting.permissions?.length || setting.permissions.some(p => checkPermission(user, p))
+  );
   const currentSettings = userSettings.slice(startIndex, endIndex);
 
   const container = {
@@ -112,7 +114,7 @@ export async function buildComponentsV2(client, user, currentPage, itemsPerPage,
     
     container.components.push({
       type: ComponentType.TextDisplay,
-      content: `-# Page **${currentPage + 1}** of **${Math.ceil(userSettings.length / itemsPerPage)}**${checkPermission(user, "staff") ? " • including staff global options" : ""}`
+      content: `-# Page **${currentPage + 1}** of **${Math.ceil(userSettings.length / itemsPerPage)}**${checkPermission(user, "staff") ? " • including staff options" : ""}`
     });
 
     container.components.push({

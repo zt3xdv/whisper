@@ -14,6 +14,7 @@ export class Settings {
       key: "whitelistedRoles",
       type: "role",
       guild: true,
+      permissions: ["staff"],
       defaultValue: [],
       name: "Whitelisted Roles",
       description: "Roles that can use Whisper AI"
@@ -22,6 +23,7 @@ export class Settings {
       key: "whitelistedUsers",
       type: "user",
       guild: true,
+      permissions: ["staff"],
       defaultValue: [],
       name: "Whitelisted Users",
       description: "Users that can use Whisper AI"
@@ -30,6 +32,7 @@ export class Settings {
       key: "whitelistedChannels",
       type: "channel",
       guild: true,
+      permissions: ["staff"],
       defaultValue: [],
       name: "Whitelisted Channels",
       description: "Where can Whisper yap around?"
@@ -41,6 +44,8 @@ export class Settings {
       max: 70,
       defaultValue: 30,
       required: true,
+      global: true,
+      permissions: ["staff"],
       name: "Max Context Messages",
       description: "How much messages can Whisper read since last message"
     },
@@ -51,6 +56,8 @@ export class Settings {
       max: 600,
       defaultValue: 500,
       required: true,
+      global: true,
+      permissions: ["staff"],
       name: "Max Message Length",
       description: "Max length of the messages that Whisper will read"
     },
